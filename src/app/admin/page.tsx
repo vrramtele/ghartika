@@ -391,6 +391,10 @@ function ProductForm({ form, setForm, categories }: {
         <input style={inputStyle} value={form.badge || ""} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="🔥 Best Seller" />
       </div>
       <div style={{ gridColumn: "1 / -1" }}>
+        <label style={labelStyle}>Image URL</label>
+        <input style={inputStyle} value={form.image || ""} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="e.g. /images/red-chili.jpg or https://..." />
+      </div>
+      <div style={{ gridColumn: "1 / -1" }}>
         <label style={labelStyle}>Description</label>
         <textarea
           style={{ ...inputStyle, minHeight: "80px", resize: "vertical" }}
