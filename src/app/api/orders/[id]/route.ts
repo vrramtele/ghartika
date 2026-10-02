@@ -26,7 +26,7 @@ export async function PATCH(
       );
     }
 
-    const updated = updateOrderStatus(id, status);
+    const updated = await updateOrderStatus(id, status);
     if (!updated) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

@@ -10,7 +10,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    const updated = updateProduct(id, body);
+    const updated = await updateProduct(id, body);
     if (!updated) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -32,7 +32,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const deleted = deleteProduct(id);
+    const deleted = await deleteProduct(id);
 
     if (!deleted) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });

@@ -4,7 +4,7 @@ import { getProducts, createProduct, Product } from "@/lib/db";
 // GET /api/products — fetch all products
 export async function GET() {
   try {
-    const products = getProducts();
+    const products = await getProducts();
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const newProduct = createProduct({
+    const newProduct = await createProduct({
       name,
       price: Number(price),
       weight,

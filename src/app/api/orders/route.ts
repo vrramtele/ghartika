@@ -4,7 +4,7 @@ import { getOrders, createOrder, CustomerInfo, CartItem } from "@/lib/db";
 // GET /api/orders — fetch all orders (admin)
 export async function GET() {
   try {
-    const orders = getOrders();
+    const orders = await getOrders();
     return NextResponse.json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const order = createOrder(
+    const order = await createOrder(
       customer as CustomerInfo,
       items as CartItem[],
       total,
