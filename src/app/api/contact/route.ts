@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
+  // Initialize Resend lazily (inside function) to avoid build-time crash
+  const apiKey = process.env.RESEND_API_KEY;
+  const isResendConfigured = apiKey && !apiKey.startsWith("re_xxx");
+  const resend = isResendConfigured ? new Resend(apiKey) : null;
+
   try {
     const body = await req.json();
     const { name, email, phone, subject, message } = body;
@@ -17,6 +20,11 @@ export async function POST(req: NextRequest) {
     }
 
     const toEmail = process.env.CONTACT_TO_EMAIL || "support@ghartika.in";
+
+    if (!resend) {
+      console.warn("Resend not configured — skipping email");
+      return NextResponse.json({ success: true, note: "Email service not configured" });
+    }
 
     const { error } = await resend.emails.send({
       from: "Ghartika Website <onboarding@resend.dev>",
