@@ -1,0 +1,60 @@
+[
+  {
+    "id": "p1",
+    "name": "Red Chilli Powder (Lal Mirchi)",
+    "price": 150,
+    "weight": "250g",
+    "category": "Everyday Essentials",
+    "image": "/images/red-chili.jpg",
+    "badge": "🔥 Best Seller",
+    "description": "Hamaari signature Red Chilli Powder sun-dried lal mirchiyon se bani hai. Yeh aapke khane mein vibrant lal rang aur perfect spiciness deti hai — bina natural flavor ko dabaye. Stone-ground process se iska asli swad aur aroma barkarar rehta hai."
+  },
+  {
+    "id": "p2",
+    "name": "Turmeric Powder (Haldi)",
+    "price": 120,
+    "weight": "250g",
+    "category": "Everyday Essentials",
+    "image": "/images/turmeric.jpg",
+    "badge": "✨ Pure & Organic",
+    "description": "Behtar kisanon ke khetoon se seedha aayi yeh Haldi curcumin se bharpur hai. Sone jaisi rang aur garam mitti jaisa swad deti hai — immunity badhane ke liye jaani jati hai. Koi bhi artificial color ya additive nahi."
+  },
+  {
+    "id": "p3",
+    "name": "Coriander Powder (Dhaniya)",
+    "price": 110,
+    "weight": "250g",
+    "category": "Everyday Essentials",
+    "image": "/images/coriander.jpg",
+    "badge": "🌿 Fresh Aroma",
+    "description": "Taze bhune dhaniye ke beej se pisa gaya yeh powder ek hafif citrusy swad deta hai jo dusre masalon ko balance karta hai. Roz ke Indian khane mein yeh ek zaroori masala hai. Freshness lock karne ke liye airtight pack mein bheja jaata hai."
+  },
+  {
+    "id": "p4",
+    "name": "Special Garam Masala",
+    "price": 250,
+    "weight": "200g",
+    "category": "Premium Blends",
+    "image": "/images/garam-masala.jpg",
+    "badge": "👑 Premium Blend",
+    "description": "15 premium whole spices ka secret blend — roasted aur perfectly ground. Ek choti si chutki bhi aapke kisi bhi curry ka swad aur khushboo bilkul badal degi. Yeh hamaara sabse premium product hai jise master blender ne khud taiyar kiya hai."
+  },
+  {
+    "id": "p5",
+    "name": "Ghartika Spice Combo — Charo Masale",
+    "price": 499,
+    "originalPrice": 630,
+    "weight": "4 Products",
+    "category": "Combos",
+    "image": "/images/red-chili.jpg",
+    "badge": "🎁 Save ₹131",
+    "isCombo": true,
+    "comboItems": [
+      "Red Chilli Powder — 250g",
+      "Turmeric Powder — 250g",
+      "Coriander Powder — 250g",
+      "Special Garam Masala — 200g"
+    ],
+    "description": "Hamare charo best masale ek hi pack mein — seedha aapke ghar tak. Yeh combo aapki rasoi ko poori tarah se set kar deta hai. Individual khareedne par ₹630 lagte hain, combo mein sirf ₹499 — bachao ₹131! Perfect gift bhi hai."
+  }
+]

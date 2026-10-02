@@ -1,0 +1,51 @@
+[
+  {
+    "id": "ORD-1790964865106-508",
+    "date": "2026-10-02T18:14:25.106Z",
+    "customer": {
+      "name": "ahul",
+      "email": "vishalramteke1031@gmail.com",
+      "phone": "22222222222",
+      "address": "Amit madhukar yede, behind matan market,katol, dist-nagput",
+      "city": "Bhandara",
+      "state": "Maharashtra",
+      "pincode": "441302"
+    },
+    "items": [
+      {
+        "id": "p5",
+        "name": "Ghartika Spice Combo — Charo Masale",
+        "price": 499,
+        "originalPrice": 630,
+        "weight": "4 Products",
+        "category": "Combos",
+        "image": "/images/red-chili.jpg",
+        "badge": "🎁 Save ₹131",
+        "isCombo": true,
+        "comboItems": [
+          "Red Chilli Powder — 250g",
+          "Turmeric Powder — 250g",
+          "Coriander Powder — 250g",
+          "Special Garam Masala — 200g"
+        ],
+        "description": "Hamare charo best masale ek hi pack mein — seedha aapke ghar tak. Yeh combo aapki rasoi ko poori tarah se set kar deta hai. Individual khareedne par ₹630 lagte hain, combo mein sirf ₹499 — bachao ₹131! Perfect gift bhi hai.",
+        "quantity": 1
+      },
+      {
+        "id": "p1",
+        "name": "Red Chilli Powder (Lal Mirchi)",
+        "price": 150,
+        "weight": "250g",
+        "category": "Everyday Essentials",
+        "image": "/images/red-chili.jpg",
+        "badge": "🔥 Best Seller",
+        "description": "Hamaari signature Red Chilli Powder sun-dried lal mirchiyon se bani hai. Yeh aapke khane mein vibrant lal rang aur perfect spiciness deti hai — bina natural flavor ko dabaye. Stone-ground process se iska asli swad aur aroma barkarar rehta hai.",
+        "quantity": 7
+      }
+    ],
+    "total": 1549,
+    "status": "Pending",
+    "razorpayOrderId": "COD",
+    "razorpayPaymentId": "COD"
+  }
+]

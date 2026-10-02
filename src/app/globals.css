@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────
+   GHARTIKA SPICES — Classic Premium Design System
+   Tailwind v4 compatible
+─────────────────────────────────────────────── */
+
+:root {
+  /* Backgrounds */
+  --background: #FEFCF8;
+  --surface: #FFFFFF;
+  --surface-muted: #FAF7F2;
+
+  /* Brand */
+  --brand-red: #A01C2C;
+  --brand-red-hover: #7B1521;
+  --brand-brown: #5C3317;
+  --brand-gold: #B8860B;
+  --brand-green: #2E7D32;
+
+  /* Text */
+  --text-primary: #1A1008;
+  --text-secondary: #5C4A32;
+  --text-muted: #9A8570;
+
+  /* Borders */
+  --border: #E8DDD0;
+  --border-light: #F0EAE0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-outfit, "Outfit", system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-red); }

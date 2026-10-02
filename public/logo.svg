@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" width="100%" height="100%">
+  <!-- Background Badge -->
+  <path d="M 50,75 
+           Q 60,30 100,20 
+           L 300,20 
+           Q 340,30 350,75 
+           Q 340,120 300,130 
+           L 100,130 
+           Q 60,120 50,75 Z" 
+        fill="#fdfaf5" stroke="#d4a373" stroke-width="4"/>
+  
+  <path d="M 40,75 
+           Q 50,25 100,15 
+           L 300,15 
+           Q 350,25 360,75 
+           Q 350,125 300,135 
+           L 100,135 
+           Q 50,125 40,75 Z" 
+        fill="none" stroke="#d4a373" stroke-width="2" opacity="0.6"/>
+
+  <!-- Leaves (Top Center) -->
+  <g transform="translate(200, 15) scale(0.6)">
+    <!-- Center Leaf -->
+    <path d="M 0,0 Q -15,-30 0,-50 Q 15,-30 0,0" fill="#368c28" stroke="#ffffff" stroke-width="2"/>
+    <!-- Left Leaf -->
+    <path d="M -5,5 Q -30,-10 -25,-35 Q -10,-10 -5,5" fill="#44aa33" stroke="#ffffff" stroke-width="2"/>
+    <!-- Right Leaf -->
+    <path d="M 5,5 Q 30,-10 25,-35 Q 10,-10 5,5" fill="#44aa33" stroke="#ffffff" stroke-width="2"/>
+  </g>
+
+  <!-- Text "Ghart" -->
+  <text x="80" y="90" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="#b20d15">Ghart</text>
+  
+  <!-- Chili (acts as 'i') -->
+  <g transform="translate(230, 45) scale(0.5)">
+    <path d="M 10,10 Q 30,50 15,90 Q 0,50 10,10" fill="#b20d15" />
+    <!-- Chili stem -->
+    <path d="M 10,10 Q 12,0 20,-5" fill="none" stroke="#368c28" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="11" cy="7" r="3" fill="#368c28"/>
+  </g>
+
+  <!-- Text "ka" -->
+  <text x="250" y="90" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="#b20d15">ka</text>
+
+  <!-- Subtext "spices" -->
+  <text x="200" y="115" font-family="Arial, sans-serif" font-size="16" font-style="italic" font-weight="bold" fill="#b20d15" letter-spacing="8" text-anchor="middle">S P I C E S</text>
+
+  <!-- Small accent lines next to spices -->
+  <line x1="100" y1="110" x2="130" y2="110" stroke="#b20d15" stroke-width="1.5"/>
+  <line x1="270" y1="110" x2="300" y2="110" stroke="#b20d15" stroke-width="1.5"/>
+</svg>
