@@ -52,6 +52,21 @@ export default function Checkout() {
           "COD",
           "COD"
         );
+        // Send order confirmation email (silent - don't block UI)
+        fetch("/api/send-order-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: {
+              id: newOrderId,
+              customer: formData,
+              items: cart,
+              total: totalPrice,
+              razorpayOrderId: "COD",
+              razorpayPaymentId: "COD",
+            },
+          }),
+        }).catch(console.error);
         clearCart();
         setOrderId(newOrderId);
         setIsSuccess(true);
@@ -117,6 +132,22 @@ export default function Checkout() {
               response.razorpay_order_id,
               response.razorpay_payment_id
             );
+
+            // Send order confirmation email (silent - don't block UI)
+            fetch("/api/send-order-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                order: {
+                  id: newOrderId,
+                  customer: formData,
+                  items: cart,
+                  total: totalPrice,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                },
+              }),
+            }).catch(console.error);
 
             clearCart();
             setOrderId(newOrderId);

@@ -45,11 +45,11 @@ export default function Footer() {
             <div className="flex flex-col gap-3 text-sm text-gray-400">
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-[var(--brand-red)] mt-0.5 shrink-0" />
-                <span>Ghartika Spices, Plot No. 12, Masala Bazar, Indore, M.P. – 452001</span>
+                <span>Ghartika Spices, Nagpur, Maharashtra</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-[var(--brand-red)] shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>+91 79721 46152</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-[var(--brand-red)] shrink-0" />

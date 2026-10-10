@@ -2,12 +2,12 @@
 
 export default function InstagramSection() {
   const posts = [
-    "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1581600140682-d4e68c8cde32?q=80&w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1615486171448-4fbaf0c6095d?q=80&w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1599909696714-38c29db26c8e?q=80&w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=400&auto=format&fit=crop",
+    "/images/red-chili.jpg",
+    "/images/turmeric.jpg",
+    "/images/combo-pack.jpg",
+    "/images/dal.jpg",
+    "/images/recipe-main.jpg",
+    "/images/paneer.jpg",
   ];
 
   return (

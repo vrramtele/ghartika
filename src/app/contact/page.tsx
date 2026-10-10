@@ -26,7 +26,7 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Hamara Pata",
-    lines: ["Ghartika Spices, Plot No. 12,", "Masala Bazar, Indore, M.P. – 452001"],
+    lines: ["Ghartika Spices,", "Nagpur, Maharashtra"],
     iconColor: "var(--brand-red)",
     bg: "#FDF2F3",
     border: "#F5C6CB",
@@ -34,7 +34,7 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Phone / WhatsApp",
-    lines: ["+91 98765 43210", "+91 91234 56789"],
+    lines: ["+91 79721 46152"],
     iconColor: "var(--brand-green)",
     bg: "#F1F8F1",
     border: "#C8E6C9",
@@ -428,7 +428,7 @@ export default function ContactPage() {
             >
               <iframe
                 title="Ghartika Spices Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117753.26484669305!2d75.78489677294922!3d22.71927180000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fcad1b410ddb%3A0x96ec4da356240f4!2sIndore%2C%20Madhya%20Pradesh!5e0!3m2!1sen!2sin!4v1720000000000"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d119020.3765205739!2d78.96888007929686!3d21.14631230000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd4c0a5a31faf13%3A0x19b37cf3b7a83de1!2sNagpur%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1720000000001"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -441,7 +441,7 @@ export default function ContactPage() {
             {/* WhatsApp CTA */}
             <a
               id="contact-whatsapp-cta"
-              href="https://wa.me/919876543210?text=Namaste%20Ghartika%20Spices!%20Mujhe%20kuch%20poochna%20tha..."
+              href="https://wa.me/917972146152?text=Namaste%20Ghartika%20Spices!%20Mujhe%20kuch%20poochna%20tha..."
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 text-white rounded-2xl px-6 py-5 shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all group"

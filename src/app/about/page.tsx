@@ -72,7 +72,7 @@ const values = [
 ];
 
 const milestones = [
-  { year: "2018", title: "Shuruaat", desc: "Indore ki ek choti si chakki se Ghartika ki neev rakhi gayi." },
+  { year: "2018", title: "Shuruaat", desc: "Nagpur ki ek choti si chakki se Ghartika ki neev rakhi gayi." },
   { year: "2019", title: "Pehle 1,000 Customers", desc: "Word-of-mouth se hazaron pariwaaron ne hamara vishwas kiya." },
   { year: "2021", title: "Online Launch", desc: "Digital platform ke zariye poore India mein delivery shuru ki." },
   { year: "2023", title: "10+ Products", desc: "Haldi se leke Garam Masala tak — ek poora spice family." },
@@ -164,7 +164,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="text-lg max-w-lg leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              Ghartika Spices ki neev 2018 mein Indore ki galiyon mein rakhi gayi thi — ek simple sapne ke saath:{" "}
+              Ghartika Spices ki neev 2018 mein Nagpur ki galiyon mein rakhi gayi thi — ek simple sapne ke saath:{" "}
               <strong style={{ color: "var(--text-primary)" }}>har ghar mein shuddh, ghar jaisa swad.</strong>
             </p>
 
@@ -249,7 +249,7 @@ export default function AboutPage() {
             >
               <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>Since</p>
               <p className="text-2xl font-black" style={{ color: "var(--brand-red)" }}>2018</p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Indore, M.P.</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Nagpur, M.H.</p>
             </motion.div>
           </motion.div>
         </div>
@@ -319,7 +319,7 @@ export default function AboutPage() {
             >
               <Quote className="absolute -left-4 -top-2 w-7 h-7 opacity-60" style={{ color: "var(--brand-gold)" }} />
               <p className="leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                Hamaare founder Ramesh Sharma ko yaad hai jab unki maa Indore ki chakki se masale pisti thi — woh khushboo,
+                Hamaare founder Ramesh Sharma ko yaad hai jab unki maa Nagpur ki chakki se masale pisti thi — woh khushboo,
                 woh swad jo kisi market ke packet mein nahi milta tha. Unhi yaadein leke unhone Ghartika Spices ki shuruaat ki.
               </p>
               <p className="leading-relaxed" style={{ color: "var(--text-secondary)" }}>

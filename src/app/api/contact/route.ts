@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
           </div>
           
           <div style="background: #f5f5f5; padding: 16px 32px; text-align: center;">
-            <p style="margin: 0; font-size: 12px; color: #999;">Ghartika Spices · Indore, M.P. · <a href="mailto:support@ghartika.in" style="color: #A01C2C;">support@ghartika.in</a></p>
+            <p style="margin: 0; font-size: 12px; color: #999;">Ghartika Spices · Nagpur, M.H. · <a href="mailto:support@ghartika.in" style="color: #A01C2C;">support@ghartika.in</a></p>
           </div>
         </div>
       `,
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
             
             <p style="color: #555; font-size: 14px;">
               Urgent kaam ke liye hum WhatsApp pe bhi available hain:<br/>
-              <a href="https://wa.me/919876543210" style="color: #25D366; font-weight: bold;">📱 WhatsApp: +91 98765 43210</a>
+              <a href="https://wa.me/917972146152" style="color: #25D366; font-weight: bold;">📱 WhatsApp: +91 79721 46152</a>
             </p>
             
             <div style="margin-top: 24px; text-align: center;">
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
           </div>
           
           <div style="background: #f5f5f5; padding: 16px 32px; text-align: center;">
-            <p style="margin: 0; font-size: 12px; color: #999;">Ghartika Spices · Indore, M.P. · support@ghartika.in</p>
+            <p style="margin: 0; font-size: 12px; color: #999;">Ghartika Spices · Nagpur, M.H. · support@ghartika.in</p>
           </div>
         </div>
       `,

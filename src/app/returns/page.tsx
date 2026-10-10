@@ -205,7 +205,7 @@ export default function ReturnsPage() {
             <h4 className="font-bold mb-1" style={{ color: "var(--text-primary)" }}>Ek Zaroori Baat</h4>
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               Return ke liye hamesha apna <strong>Order ID</strong> aur product ki <strong>clear photo</strong> zaroor bhejo —
-              isse process fast ho jaata hai. WhatsApp: <strong>+91 98765 43210</strong>
+              isse process fast ho jaata hai. WhatsApp: <strong>+91 79721 46152</strong>
             </p>
           </div>
         </motion.div>

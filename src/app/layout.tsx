@@ -12,6 +12,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ghartika.in"),
   title: "Ghartika Spices | Premium D2C Indian Spices",
   description: "Experience the authentic taste of tradition with Ghartika Spices. 100% Pure, Stone Ground, and Premium Quality.",
   keywords: ["indian spices", "masala", "premium spices", "organic spices", "stone ground spices", "buy spices online india"],
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     description: "100% pure, unadulterated, stone-ground spices delivered straight from farms to your kitchen.",
     images: [
       {
-        url: "/og-image.jpg", // Needs an actual image in public folder later
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Ghartika Premium Spices",
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ghartika Spices | Premium Indian Spices",
     description: "100% pure, unadulterated, stone-ground spices delivered straight from farms to your kitchen.",
+    images: ["/og-image.jpg"],
   },
 };
 
