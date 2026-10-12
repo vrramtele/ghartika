@@ -44,8 +44,6 @@ export const metadata: Metadata = {
   },
 };
 
-import Script from "next/script";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,9 +51,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
-      </head>
       <body
         className={`${outfit.variable} antialiased min-h-screen font-sans bg-[var(--background)] text-[var(--text-primary)]`}
       >

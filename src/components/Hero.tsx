@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Leaf, Star, Truck, Award } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, ShieldCheck, Leaf, Star, Award } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const slides = [
@@ -57,17 +58,6 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex flex-col overflow-hidden" style={{ backgroundColor: "var(--surface-muted)" }}>
-
-      {/* ── Announcement Bar ── */}
-      <div className="relative z-20 text-white text-center text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-2"
-        style={{ background: "linear-gradient(90deg, var(--brand-red), var(--brand-brown))" }}>
-        <Truck className="w-3.5 h-3.5 flex-shrink-0" />
-        <span>🎉 FREE Delivery on all orders above ₹299 · COD Available Pan India</span>
-        <span className="hidden sm:inline">·</span>
-        <Link href="/shop" className="hidden sm:inline underline underline-offset-2 hover:no-underline font-bold">
-          Shop Now →
-        </Link>
-      </div>
 
       {/* ── Main Hero ── */}
       <div className="flex-1 grid lg:grid-cols-2 items-center gap-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 w-full">
@@ -148,12 +138,16 @@ export default function Hero() {
                 border: "2px solid var(--border)",
                 transition: "opacity 0.4s, transform 0.4s",
               }}>
-              <img
-                src={slide.image}
-                alt="Ghartika Premium Spices"
-                className="w-full object-cover"
-                style={{ height: "440px" }}
-              />
+              <div className="relative" style={{ height: "440px" }}>
+                <Image
+                  src={slide.image}
+                  alt={`Ghartika Premium Spices — ${slide.highlight}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
               {/* Gradient overlay */}
               <div className={`absolute inset-0 bg-gradient-to-t ${slide.color} to-transparent opacity-60`} />
             </div>

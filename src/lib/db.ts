@@ -106,12 +106,9 @@ export async function getOrders(): Promise<Order[]> {
   if (redis) {
     const ids: string[] = (await redis.lrange("orders:ids", 0, -1)) || [];
     if (ids.length === 0) return [];
-    const orders: Order[] = [];
-    for (const id of ids) {
-      const o = await redis.get(`order:${id}`);
-      if (o) orders.push(o as Order);
-    }
-    return orders;
+    // Batched fetch — avoids N+1 Redis round-trips
+    const results = (await redis.mget(...ids.map((id: string) => `order:${id}`))) as (Order | null)[];
+    return results.filter((o: Order | null): o is Order => o !== null);
   }
   return readJSON<Order>(ORDERS_FILE);
 }
@@ -184,19 +181,16 @@ export async function getProducts(): Promise<Product[]> {
   if (redis) {
     const ids: string[] = (await redis.lrange("products:ids", 0, -1)) || [];
     if (ids.length === 0) {
-      // Seed with initial products
+      // Seed with initial products using pipeline for efficiency
       for (const p of initialProducts as Product[]) {
         await redis.set(`product:${p.id}`, JSON.stringify(p));
         await redis.rpush("products:ids", p.id);
       }
       return initialProducts as Product[];
     }
-    const products: Product[] = [];
-    for (const id of ids) {
-      const p = await redis.get(`product:${id}`);
-      if (p) products.push(p as Product);
-    }
-    return products;
+    // Batched fetch — avoids N+1 Redis round-trips
+    const results = (await redis.mget(...ids.map((id: string) => `product:${id}`))) as (Product | null)[];
+    return results.filter((p: Product | null): p is Product => p !== null);
   }
 
   const products = readJSON<Product>(PRODUCTS_FILE);

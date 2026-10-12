@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, X, Search, User } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 const navLinks = [
@@ -47,7 +48,7 @@ export default function Header() {
 
             {/* Logo */}
             <Link href="/" className="flex items-center shrink-0">
-              <img src="/logo.png" alt="Ghartika Spices" className="h-14 w-auto object-contain" />
+              <Image src="/logo.png" alt="Ghartika Spices" width={140} height={56} className="h-14 w-auto object-contain" priority />
             </Link>
 
             {/* Desktop Nav */}
@@ -75,12 +76,6 @@ export default function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
-              <button className="transition-colors" style={{ color: "var(--text-secondary)" }}>
-                <Search className="w-5 h-5" />
-              </button>
-              <Link href="/login" className="transition-colors" style={{ color: "var(--text-secondary)" }}>
-                <User className="w-5 h-5" />
-              </Link>
               <Link href="/cart" className="relative transition-colors" style={{ color: "var(--text-secondary)" }}>
                 <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (

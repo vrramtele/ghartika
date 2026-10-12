@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Star, CheckCircle2 } from "lucide-react";
 
 const reviews = [
@@ -56,18 +57,22 @@ export default function Reviews() {
                 ))}
               </div>
 
-              {/* Review text */}
+              {/* Review text — Fixed: was literally printing "{review.text}" */}
               <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-grow">
-                "{review.text}"
+                &ldquo;{review.text}&rdquo;
               </p>
 
               {/* Reviewer */}
               <div className="flex items-center gap-4 pt-5 border-t border-[var(--border-light)]">
-                <img
-                  src={review.image}
-                  alt={review.name}
-                  className="w-11 h-11 rounded-full object-cover border-2 border-[var(--border)]"
-                />
+                <div className="relative w-11 h-11 flex-shrink-0">
+                  <Image
+                    src={review.image}
+                    alt={review.name}
+                    fill
+                    sizes="44px"
+                    className="rounded-full object-cover border-2 border-[var(--border)]"
+                  />
+                </div>
                 <div>
                   <p className="font-semibold text-[var(--text-primary)] text-sm">{review.name}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">

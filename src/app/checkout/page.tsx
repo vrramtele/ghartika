@@ -7,6 +7,7 @@ import { useOrders } from "@/context/OrderContext";
 import { CheckCircle2, ArrowLeft, Package } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition";
@@ -199,6 +200,7 @@ export default function Checkout() {
   if (isSuccess) {
     return (
       <main className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)" }}>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <Header />
         <div className="flex-1 flex items-center justify-center pt-24 pb-12">
           <div
@@ -278,6 +280,7 @@ export default function Checkout() {
 
   return (
     <main className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)" }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Header />
 
       <div className="flex-1 pt-24 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">

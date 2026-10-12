@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function InstagramSection() {
   const posts = [
     "/images/red-chili.jpg",
@@ -19,15 +21,17 @@ export default function InstagramSection() {
           {posts.map((url, i) => (
             <a
               key={i}
-              href="https://instagram.com"
+              href="https://instagram.com/ghartikaspice"
               target="_blank"
               rel="noopener noreferrer"
-              className="block aspect-square overflow-hidden rounded-md group"
+              className="block aspect-square overflow-hidden rounded-md group relative"
             >
-              <img
+              <Image
                 src={url}
-                alt={`Post ${i + 1}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400 ease-out"
+                alt={`Ghartika Spices Instagram Post ${i + 1}`}
+                fill
+                sizes="(max-width: 768px) 33vw, 16vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-400 ease-out"
               />
             </a>
           ))}
