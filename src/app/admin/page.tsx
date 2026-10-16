@@ -11,7 +11,7 @@ import {
   Truck, XCircle, AlertCircle, BarChart2,
   ArrowUpRight, RefreshCw, LogOut, Lock,
   Eye, EyeOff, Store, Plus, Trash2, Edit3,
-  Save, X, IndianRupee, ShoppingCart
+  Save, X, IndianRupee, ShoppingCart, Menu
 } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -567,9 +567,13 @@ function AnalyticsTab({ orders }: { orders: ReturnType<typeof useOrders>["orders
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const { orders, updateOrderStatus, isLoading: ordersLoading } = useOrders();
+  const { orders, updateOrderStatus, isLoading: ordersLoading, refreshOrders } = useOrders();
+  const { refreshProducts } = useProducts();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -580,14 +584,23 @@ export default function AdminDashboard() {
     setMounted(true);
     fetch("/api/admin/auth")
       .then((r) => r.json())
-      .then((d) => { if (d.loggedIn) setIsLoggedIn(true); })
-      .catch(() => {});
-  }, []);
-
-  if (!mounted) return null; // Avoid rendering until hydrated
+      .then((d) => {
+        if (d.loggedIn) {
+          setIsLoggedIn(true);
+          refreshOrders();
+          refreshProducts();
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setAuthChecking(false);
+      });
+  }, [refreshOrders, refreshProducts]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    refreshOrders();
+    refreshProducts();
   };
 
   const handleLogout = async () => {
@@ -599,6 +612,15 @@ export default function AdminDashboard() {
     setIsLoggedIn(false);
   };
 
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refreshOrders(), refreshProducts()]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const handleStatusUpdate = async (orderId: string, status: OrderStatus) => {
     try {
       await updateOrderStatus(orderId, status);
@@ -607,6 +629,39 @@ export default function AdminDashboard() {
       alert("Status update failed. Please try again.");
     }
   };
+
+  if (!mounted || authChecking) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: BG_MAIN,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-outfit), sans-serif",
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "14px",
+          color: BRAND_RED,
+          fontWeight: 600,
+        }}>
+          <div style={{
+            width: "40px",
+            height: "40px",
+            border: `3px solid ${BORDER_COLOR}`,
+            borderTopColor: BRAND_RED,
+            borderRadius: "50%",
+            animation: "adminSpin 0.8s linear infinite"
+          }} />
+          <span style={{ fontSize: "14px", color: TEXT_MUTED }}>Loading Admin Panel...</span>
+          <style>{`@keyframes adminSpin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) return <LoginScreen onLogin={handleLogin} />;
 
@@ -653,14 +708,27 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: BG_MAIN, display: "flex", fontFamily: "var(--font-outfit), sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: BG_MAIN, display: "flex", fontFamily: "var(--font-outfit), sans-serif", position: "relative" }}>
+      {/* ── Mobile Backdrop ── */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 45,
+          }}
+        />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside style={{
-        width: "240px", background: BG_SURFACE, borderRight: `1px solid ${BORDER_COLOR}`,
-        display: "flex", flexDirection: "column", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 50,
-      }}>
+      <aside
+        className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}
+        style={{
+          width: "240px", background: BG_SURFACE, borderRight: `1px solid ${BORDER_COLOR}`,
+          display: "flex", flexDirection: "column", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 50,
+        }}
+      >
         {/* Logo */}
-        <div style={{ padding: "24px 20px", borderBottom: `1px solid ${BORDER_COLOR}` }}>
+        <div style={{ padding: "24px 20px", borderBottom: `1px solid ${BORDER_COLOR}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{
               width: "38px", height: "38px", borderRadius: "10px", background: BRAND_RED,
@@ -673,6 +741,15 @@ export default function AdminDashboard() {
               <p style={{ margin: "3px 0 0", color: TEXT_MUTED, fontSize: "11px" }}>Admin Panel</p>
             </div>
           </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="admin-mobile-toggle"
+            style={{
+              display: "none", background: "none", border: "none", cursor: "pointer", color: TEXT_MUTED, padding: "4px"
+            }}
+          >
+            <X style={{ width: "20px", height: "20px" }} />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -680,7 +757,7 @@ export default function AdminDashboard() {
           {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
               style={{
                 width: "100%", display: "flex", alignItems: "center", gap: "10px",
                 padding: "10px 14px", borderRadius: "10px", border: "none",
@@ -748,33 +825,80 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ── Main Content ── */}
-      <div style={{ flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div className="admin-main-wrap" style={{ flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         {/* Top Header */}
         <header style={{
           background: BG_SURFACE, borderBottom: `1px solid ${BORDER_COLOR}`,
-          padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center",
           position: "sticky", top: 0, zIndex: 40,
         }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: TEXT_PRIMARY }}>
-              {tabLabels[activeTab]}
-            </h1>
-            <p style={{ margin: "2px 0 0", color: TEXT_MUTED, fontSize: "13px" }}>
-              Ghartika Spices Admin — {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </p>
-          </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="admin-mobile-toggle"
+              style={{
+                display: "none",
+                background: BG_MAIN,
+                border: `1px solid ${BORDER_COLOR}`,
+                borderRadius: "8px",
+                padding: "8px",
+                cursor: "pointer",
+                color: TEXT_PRIMARY,
+              }}
+              title="Toggle Menu"
+            >
+              <Menu style={{ width: "18px", height: "18px" }} />
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 800, color: TEXT_PRIMARY }}>
+                {tabLabels[activeTab]}
+              </h1>
+              <p style={{ margin: "2px 0 0", color: TEXT_MUTED, fontSize: "12px" }}>
+                Ghartika Spices Admin — {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+              </p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              title="Refresh Orders & Products"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 14px",
+                background: BG_MAIN,
+                border: `1px solid ${BORDER_COLOR}`,
+                borderRadius: "10px",
+                color: TEXT_PRIMARY,
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: isRefreshing ? "not-allowed" : "pointer",
+                fontFamily: "var(--font-outfit), sans-serif",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <RefreshCw
+                style={{
+                  width: "14px",
+                  height: "14px",
+                  animation: isRefreshing ? "adminSpin 0.8s linear infinite" : "none",
+                }}
+              />
+              <span className="hidden-mobile">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
+            </button>
             <div style={{
-              padding: "6px 14px", background: "#f0fdf4", border: "1px solid #bbf7d0",
-              borderRadius: "99px", fontSize: "13px", fontWeight: 600, color: "#16a34a",
+              padding: "6px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0",
+              borderRadius: "99px", fontSize: "12px", fontWeight: 600, color: "#16a34a",
               display: "flex", alignItems: "center", gap: "6px",
             }}>
               <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e" }} /> Live
             </div>
             <div style={{
-              width: "36px", height: "36px", borderRadius: "99px",
+              width: "34px", height: "34px", borderRadius: "99px",
               background: BRAND_RED, display: "flex", alignItems: "center", justifyContent: "center",
-              color: "white", fontWeight: 800, fontSize: "14px", cursor: "pointer",
+              color: "white", fontWeight: 800, fontSize: "13px",
             }}>
               A
             </div>
@@ -1053,6 +1177,31 @@ export default function AdminDashboard() {
 
         </main>
       </div>
+
+      <style>{`
+        @keyframes adminSpin {
+          to { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+          .admin-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.25s ease-in-out;
+            box-shadow: 0 0 25px rgba(0,0,0,0.25);
+          }
+          .admin-sidebar.open {
+            transform: translateX(0);
+          }
+          .admin-main-wrap {
+            margin-left: 0 !important;
+          }
+          .admin-mobile-toggle {
+            display: flex !important;
+          }
+          .hidden-mobile {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

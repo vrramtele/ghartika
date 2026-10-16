@@ -44,24 +44,9 @@ async function verifyJWT(token: string, secret: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── Protect /admin routes (except the login page itself) ──────────────────
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const token = request.cookies.get(COOKIE_NAME)?.value;
-
-    if (!token) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    const valid = await verifyJWT(token, JWT_SECRET);
-    if (!valid) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("expired", "1");
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.delete(COOKIE_NAME);
-      return response;
-    }
+  // ── Redirect /admin/login to /admin (unified admin page handles login internally) ──
+  if (pathname === "/admin/login") {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   // ── Protect admin-only API routes ─────────────────────────────────────────
@@ -81,7 +66,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect product write operations (POST, PATCH, DELETE) — admin only
+  // Protect product write operations (POST, PATCH, DELETE) & order status updates (PATCH) — admin only
   if (
     protectedApis.some((p) => pathname.startsWith(p)) &&
     ["POST", "PATCH", "DELETE"].includes(request.method) &&
@@ -98,7 +83,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin/:path*",
+    "/admin/login",
     "/api/orders/:path*",
     "/api/products/:path*",
   ],

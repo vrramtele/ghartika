@@ -107,8 +107,10 @@ export async function getOrders(): Promise<Order[]> {
     const ids: string[] = (await redis.lrange("orders:ids", 0, -1)) || [];
     if (ids.length === 0) return [];
     // Batched fetch — avoids N+1 Redis round-trips
-    const results = (await redis.mget(...ids.map((id: string) => `order:${id}`))) as (Order | null)[];
-    return results.filter((o: Order | null): o is Order => o !== null);
+    const results = (await redis.mget(...ids.map((id: string) => `order:${id}`))) as (Order | string | null)[];
+    return results
+      .filter((o): o is Order | string => o !== null && o !== undefined)
+      .map((o) => (typeof o === "string" ? JSON.parse(o) : o));
   }
   return readJSON<Order>(ORDERS_FILE);
 }
@@ -117,7 +119,8 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
   const redis = getRedis();
   if (redis) {
     const o = await redis.get(`order:${id}`);
-    return o ? (o as Order) : undefined;
+    if (!o) return undefined;
+    return (typeof o === "string" ? JSON.parse(o) : o) as Order;
   }
   return readJSON<Order>(ORDERS_FILE).find((o) => o.id === id);
 }
@@ -161,7 +164,8 @@ export async function updateOrderStatus(
   if (redis) {
     const o = await redis.get(`order:${id}`);
     if (!o) return null;
-    const updated = { ...(o as Order), status };
+    const orderObj = typeof o === "string" ? JSON.parse(o) : (o as Order);
+    const updated = { ...orderObj, status };
     await redis.set(`order:${id}`, JSON.stringify(updated));
     return updated;
   }
@@ -189,8 +193,10 @@ export async function getProducts(): Promise<Product[]> {
       return initialProducts as Product[];
     }
     // Batched fetch — avoids N+1 Redis round-trips
-    const results = (await redis.mget(...ids.map((id: string) => `product:${id}`))) as (Product | null)[];
-    return results.filter((p: Product | null): p is Product => p !== null);
+    const results = (await redis.mget(...ids.map((id: string) => `product:${id}`))) as (Product | string | null)[];
+    return results
+      .filter((p): p is Product | string => p !== null && p !== undefined)
+      .map((p) => (typeof p === "string" ? JSON.parse(p) : p));
   }
 
   const products = readJSON<Product>(PRODUCTS_FILE);
@@ -205,7 +211,8 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   const redis = getRedis();
   if (redis) {
     const p = await redis.get(`product:${id}`);
-    return p ? (p as Product) : undefined;
+    if (!p) return undefined;
+    return (typeof p === "string" ? JSON.parse(p) : p) as Product;
   }
   return readJSON<Product>(PRODUCTS_FILE).find((p) => p.id === id);
 }
@@ -234,7 +241,8 @@ export async function updateProduct(
   if (redis) {
     const p = await redis.get(`product:${id}`);
     if (!p) return null;
-    const updated = { ...(p as Product), ...data };
+    const prodObj = typeof p === "string" ? JSON.parse(p) : (p as Product);
+    const updated = { ...prodObj, ...data };
     await redis.set(`product:${id}`, JSON.stringify(updated));
     return updated;
   }

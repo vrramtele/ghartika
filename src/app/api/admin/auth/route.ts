@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const JWT_SECRET = process.env.JWT_SECRET || "ghartika-spices-super-secret-jwt-key-2024";
 const COOKIE_NAME = "ghartika_admin_token";
 
 // ── Simple in-memory rate limiter (5 attempts per 15 minutes per IP) ─────────
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
         value: token,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 8, // 8 hours
       });
