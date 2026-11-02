@@ -170,11 +170,11 @@ export default function Checkout() {
 
       // Step 2: Open Razorpay payment modal
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder_key",
+        key: razorpayOrder.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder_key",
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: "Ghartika Spices",
-        description: "Premium Spice Order",
+        description: "Premium Stone-Ground Spice Order",
         order_id: razorpayOrder.id,
         handler: async function (response: {
           razorpay_order_id: string;
