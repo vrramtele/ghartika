@@ -111,6 +111,27 @@ export async function middleware(request: NextRequest) {
     if (!(await isAdminAuthenticated(request))) return unauthorized();
   }
 
+  // ── /api/costing/*, /api/expenses/*, /api/suppliers/*, /api/purchase-orders/*, /api/system-health/* — admin only ──
+  if (
+    pathname.startsWith("/api/costing") ||
+    pathname.startsWith("/api/expenses") ||
+    pathname.startsWith("/api/suppliers") ||
+    pathname.startsWith("/api/purchase-orders") ||
+    pathname.startsWith("/api/system-health")
+  ) {
+    if (!(await isAdminAuthenticated(request))) return unauthorized();
+  }
+
+  // ── /api/categories (GET is public; POST/PATCH/DELETE are admin only) ───────
+  if (pathname.startsWith("/api/categories") && ["POST", "PATCH", "DELETE", "PUT"].includes(reqMethod)) {
+    if (!(await isAdminAuthenticated(request))) return unauthorized();
+  }
+
+  // ── /api/media (POST/DELETE are admin only) ─────────────────────────────────
+  if (pathname.startsWith("/api/media") && ["POST", "DELETE"].includes(reqMethod)) {
+    if (!(await isAdminAuthenticated(request))) return unauthorized();
+  }
+
   // ── /api/inventory, /api/staff, /api/activity — admin only ──────────────────
   if (
     pathname.startsWith("/api/inventory") ||
@@ -136,6 +157,13 @@ export const config = {
     "/api/inventory/:path*",
     "/api/staff/:path*",
     "/api/activity/:path*",
+    "/api/costing/:path*",
+    "/api/expenses/:path*",
+    "/api/suppliers/:path*",
+    "/api/purchase-orders/:path*",
+    "/api/system-health/:path*",
+    "/api/categories/:path*",
+    "/api/media/:path*",
   ],
 };
 

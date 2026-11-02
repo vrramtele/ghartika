@@ -21,19 +21,51 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { customer, items, total, razorpayOrderId, razorpayPaymentId } = body;
 
-    if (!customer || !items || !total) {
+    if (!customer || !items || !total || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: "customer, items, and total are required" },
+        { error: "Valid customer info and items are required" },
         { status: 400 }
       );
     }
 
+    // Input sanitization & validation
+    const cleanPhone = String(customer.phone || "").replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      return NextResponse.json(
+        { error: "Valid 10-digit phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    const cleanName = String(customer.name || "").trim();
+    if (!cleanName || cleanName.length < 2) {
+      return NextResponse.json(
+        { error: "Valid customer name is required" },
+        { status: 400 }
+      );
+    }
+
+    const cleanCustomer: CustomerInfo = {
+      name: cleanName.slice(0, 100),
+      email: String(customer.email || "").trim().slice(0, 150),
+      phone: cleanPhone.slice(0, 15),
+      address: String(customer.address || "").trim().slice(0, 300),
+      city: String(customer.city || "").trim().slice(0, 100),
+      state: String(customer.state || "").trim().slice(0, 100),
+      pincode: String(customer.pincode || "").replace(/\D/g, "").slice(0, 10),
+    };
+
+    const cleanTotal = Number(total);
+    if (!cleanTotal || cleanTotal <= 0 || isNaN(cleanTotal)) {
+      return NextResponse.json({ error: "Invalid order total" }, { status: 400 });
+    }
+
     const order = await createOrder(
-      customer as CustomerInfo,
+      cleanCustomer,
       items as CartItem[],
-      total,
-      razorpayOrderId,
-      razorpayPaymentId
+      cleanTotal,
+      typeof razorpayOrderId === "string" ? razorpayOrderId.slice(0, 100) : undefined,
+      typeof razorpayPaymentId === "string" ? razorpayPaymentId.slice(0, 100) : undefined
     );
 
     return NextResponse.json(order, { status: 201 });

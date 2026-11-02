@@ -1,14 +1,48 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
-import { getStoreSettings } from "@/lib/db";
+import { getStoreSettings, getProducts, getCouponByCode } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { amount } = body;
+    const { amount, items, couponCode } = body;
 
-    if (!amount) {
-      return NextResponse.json({ error: "Amount is required" }, { status: 400 });
+    let finalAmount = Number(amount);
+    if (!finalAmount || finalAmount <= 0 || isNaN(finalAmount)) {
+      return NextResponse.json({ error: "Valid positive amount is required" }, { status: 400 });
+    }
+
+    // ── Security: Anti-Tampering Server-Side Price Verification ──────────────
+    if (items && Array.isArray(items) && items.length > 0) {
+      const dbProducts = await getProducts().catch(() => []);
+      const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+      let expectedSubtotal = 0;
+
+      for (const item of items) {
+        const prod = productMap.get(item.id);
+        const realPrice = prod ? prod.price : item.price;
+        expectedSubtotal += realPrice * (Number(item.quantity) || 1);
+      }
+
+      let discount = 0;
+      if (couponCode && typeof couponCode === "string") {
+        const coupon = await getCouponByCode(couponCode).catch(() => null);
+        if (coupon && coupon.isActive) {
+          if (coupon.type === "percentage") {
+            discount = Math.round((expectedSubtotal * coupon.value) / 100);
+            if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
+          } else if (coupon.type === "flat") {
+            discount = coupon.value;
+          }
+        }
+      }
+
+      const verifiedTotal = Math.max(0, expectedSubtotal - discount);
+      // Enforce the server-verified total to prevent client-side price hacks
+      if (Math.abs(finalAmount - verifiedTotal) > 1) {
+        console.warn(`[Security] Price tampering detected: Client submitted ₹${finalAmount}, server enforced ₹${verifiedTotal}`);
+        finalAmount = verifiedTotal;
+      }
     }
 
     // Check database settings first, then environment variables
@@ -23,7 +57,7 @@ export async function POST(req: Request) {
     });
 
     const options = {
-      amount: amount * 100, // Razorpay amount is in paise (₹1 = 100 paise)
+      amount: Math.round(finalAmount * 100), // Razorpay amount is in paise (₹1 = 100 paise)
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`,
     };

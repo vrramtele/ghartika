@@ -43,7 +43,7 @@ export default function Checkout() {
   } | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/settings")
+    fetch("/api/settings/public")
       .then((r) => r.json())
       .then((data) => {
         if (data && typeof data === "object") {
@@ -227,7 +227,11 @@ export default function Checkout() {
       const createRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: finalTotal }),
+        body: JSON.stringify({
+          amount: finalTotal,
+          items: cart,
+          couponCode: appliedCoupon?.code,
+        }),
       });
 
       if (!createRes.ok) throw new Error("Failed to create Razorpay order");
