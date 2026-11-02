@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import type { StoreSettings } from "@/types";
 import {
   Settings, Save, Shield, Truck, CreditCard, Phone, Mail,
-  AlertTriangle, Download, CheckCircle2, Lock, Store
+  AlertTriangle, Download, CheckCircle2, Lock, Store, QrCode, Eye, EyeOff, Zap, ExternalLink
 } from "lucide-react";
 import { C } from "./AdminShell";
 
@@ -23,6 +23,11 @@ const DEFAULT_SETTINGS: StoreSettings = {
   freeShippingThreshold: 499,
   enableCod: true,
   enableOnlinePayment: true,
+  enableUpiQr: true,
+  upiId: "",
+  upiName: "Ghartika Spices",
+  razorpayKeyId: "",
+  razorpayKeySecret: "",
   maintenanceMode: false,
   instagramUrl: "https://instagram.com/ghartikaspices",
   whatsappSupport: "919876543210",
@@ -32,6 +37,7 @@ export function SettingsTab() {
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
   const [toast, setToast] = useState("");
   const [exporting, setExporting] = useState(false);
 
@@ -224,7 +230,7 @@ export function SettingsTab() {
           <h3 style={{ fontSize: 16, fontWeight: 700, color: C.text, margin: "0 0 16px", display: "flex", alignItems: "center", gap: 8 }}>
             <Truck style={{ width: 18, height: 18, color: "#1d4ed8" }} /> Payment & Checkout Policies
           </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, color: C.text, display: "block", marginBottom: 6 }}>
                 Free Shipping Threshold (₹)
@@ -261,10 +267,144 @@ export function SettingsTab() {
                     onChange={(e) => handleChange("enableOnlinePayment", e.target.checked)}
                     style={{ accentColor: C.red, width: 16, height: 16 }}
                   />
-                  Enable Razorpay (UPI, Credit/Debit Cards, Netbanking)
+                  Enable Razorpay (Cards, NetBanking, Wallets, Auto-UPI)
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.text, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={settings.enableUpiQr !== false}
+                    onChange={(e) => handleChange("enableUpiQr", e.target.checked)}
+                    style={{ accentColor: C.red, width: 16, height: 16 }}
+                  />
+                  Enable Direct UPI Scan & Pay (0% Fee, Direct to Bank QR)
                 </label>
               </div>
             </div>
+          </div>
+
+          {/* Razorpay Gateway Keys Configuration */}
+          <div style={{ marginTop: 20, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <CreditCard style={{ width: 18, height: 18, color: C.red }} />
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Razorpay Payment Gateway API Keys</span>
+              </div>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20,
+                background: settings.razorpayKeyId?.startsWith("rzp_live_") ? "#DCFCE7" : "#FEF3C7",
+                color: settings.razorpayKeyId?.startsWith("rzp_live_") ? "#15803D" : "#B45309",
+                display: "inline-flex", alignItems: "center", gap: 5,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: settings.razorpayKeyId?.startsWith("rzp_live_") ? "#16A34A" : "#D97706" }} />
+                {settings.razorpayKeyId?.startsWith("rzp_live_") ? "LIVE MODE ACTIVE" : "TEST / DEV MODE"}
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.text, display: "block", marginBottom: 6 }}>
+                  Razorpay Key ID
+                </label>
+                <input
+                  type="text"
+                  placeholder="rzp_live_xxxxxxxxxxxx or rzp_test_xxxxxxxxxxxx"
+                  value={settings.razorpayKeyId || ""}
+                  onChange={(e) => handleChange("razorpayKeyId", e.target.value.trim())}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, boxSizing: "border-box", fontFamily: "monospace" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.text, display: "block", marginBottom: 6 }}>
+                  Razorpay Key Secret
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showSecret ? "text" : "password"}
+                    placeholder="Enter your Razorpay Key Secret"
+                    value={settings.razorpayKeySecret || ""}
+                    onChange={(e) => handleChange("razorpayKeySecret", e.target.value.trim())}
+                    style={{ width: "100%", padding: "10px 40px 10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, boxSizing: "border-box", fontFamily: "monospace" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: C.muted }}
+                  >
+                    {showSecret ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p style={{ fontSize: 11, color: C.muted, marginTop: 8, margin: "8px 0 0" }}>
+              💡 Keys can be found in <a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noreferrer" style={{ color: C.red, textDecoration: "underline" }}>Razorpay Dashboard &gt; Account &amp; Settings &gt; API Keys</a>. Once you paste live keys here and click Save Settings, the store immediately switches to live payments.
+            </p>
+          </div>
+
+          {/* Direct UPI Scan & Pay Configuration */}
+          <div style={{ marginTop: 20, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <QrCode style={{ width: 18, height: 18, color: "#16a34a" }} />
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Direct UPI QR &amp; VPA Configuration</span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#16a34a", background: "#DCFCE7", padding: "3px 8px", borderRadius: 6 }}>
+                0% Gateway Fee • Direct to Bank
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.text, display: "block", marginBottom: 6 }}>
+                  Store UPI ID (VPA)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 9876543210@ybl, ghartika@okaxis, or name@paytm"
+                  value={settings.upiId || ""}
+                  onChange={(e) => handleChange("upiId", e.target.value.trim())}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, boxSizing: "border-box", fontFamily: "monospace" }}
+                />
+                <span style={{ fontSize: 11, color: C.muted, marginTop: 4, display: "block" }}>
+                  Customer QR scan karega toh paise sidhe is UPI ID se jude bank account me jayenge.
+                </span>
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: C.text, display: "block", marginBottom: 6 }}>
+                  Payee Display Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. GharTika Spices"
+                  value={settings.upiName || ""}
+                  onChange={(e) => handleChange("upiName", e.target.value)}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, boxSizing: "border-box" }}
+                />
+                <span style={{ fontSize: 11, color: C.muted, marginTop: 4, display: "block" }}>
+                  Google Pay ya PhonePe me customer ko ye business name dikhega.
+                </span>
+              </div>
+            </div>
+
+            {settings.upiId && (
+              <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#F8F7F4", border: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 16 }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.upiName || "Ghartika Spices")}&cu=INR`)}`}
+                  alt="UPI QR Preview"
+                  style={{ width: 80, height: 80, borderRadius: 8, background: "#FFF", padding: 4, border: `1px solid ${C.border}` }}
+                />
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.text }}>Live UPI QR Preview Active</p>
+                  <p style={{ margin: "4px 0 0", fontSize: 12, color: C.muted }}>
+                    UPI ID: <strong>{settings.upiId}</strong> ({settings.upiName || "Ghartika Spices"})
+                  </p>
+                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "#16a34a", fontWeight: 600 }}>
+                    ✓ Customers can scan this QR directly from GPay, PhonePe, Paytm, or BHIM.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

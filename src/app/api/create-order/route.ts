@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { getStoreSettings } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
@@ -10,11 +11,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Amount is required" }, { status: 400 });
     }
 
+    // Check database settings first, then environment variables
+    const settings = await getStoreSettings().catch(() => null);
+    const keyId = settings?.razorpayKeyId || process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+    const keySecret = settings?.razorpayKeySecret || process.env.RAZORPAY_KEY_SECRET || "";
+
     // Initialize Razorpay instance
-    // Note: It's important to use environment variables for keys in production
     const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder_key",
-      key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret_key",
+      key_id: keyId || "rzp_test_placeholder_key",
+      key_secret: keySecret || "placeholder_secret_key",
     });
 
     const options = {
@@ -24,10 +29,7 @@ export async function POST(req: Request) {
     };
 
     // If using placeholder keys, we mock the order creation
-    if (
-      !process.env.RAZORPAY_KEY_ID ||
-      process.env.RAZORPAY_KEY_ID === "rzp_test_placeholder_key"
-    ) {
+    if (!keyId || keyId === "rzp_test_placeholder_key") {
       return NextResponse.json({
         id: `mock_order_${Date.now()}`,
         amount: options.amount,
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
     const order = await razorpay.orders.create(options);
     return NextResponse.json({
       ...order,
-      key_id: process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key_id: keyId,
     });
   } catch (error) {
     console.error("Razorpay Error:", error);

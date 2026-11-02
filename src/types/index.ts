@@ -212,6 +212,11 @@ export type StoreSettings = {
   freeShippingThreshold: number;
   enableCod: boolean;
   enableOnlinePayment: boolean;
+  enableUpiQr?: boolean;
+  upiId?: string;
+  upiName?: string;
+  razorpayKeyId?: string;
+  razorpayKeySecret?: string;
   maintenanceMode: boolean;
   instagramUrl?: string;
   whatsappSupport?: string;

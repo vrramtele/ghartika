@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
 import { useOrders } from "@/context/OrderContext";
-import { CheckCircle2, ArrowLeft, Package, Tag, X } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Package, Tag, X, QrCode, Smartphone, ShieldCheck, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -31,7 +31,33 @@ export default function Checkout() {
     pincode: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
+  const [paymentMethod, setPaymentMethod] = useState<"upi_qr" | "online" | "cod">("upi_qr");
+  const [upiUtr, setUpiUtr] = useState("");
+  const [storeSettings, setStoreSettings] = useState<{
+    upiId?: string;
+    upiName?: string;
+    enableCod?: boolean;
+    enableOnlinePayment?: boolean;
+    enableUpiQr?: boolean;
+    razorpayKeyId?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data === "object") {
+          setStoreSettings(data);
+          // Auto select active method if upiQr is disabled
+          if (data.enableUpiQr === false && data.enableOnlinePayment !== false) {
+            setPaymentMethod("online");
+          } else if (data.enableUpiQr === false && data.enableOnlinePayment === false) {
+            setPaymentMethod("cod");
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -119,6 +145,46 @@ export default function Checkout() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    if (paymentMethod === "upi_qr") {
+      try {
+        if (!upiUtr.trim()) {
+          alert("Kripya payment complete karne ke baad 12-digit UPI UTR / Transaction ID enter karein.");
+          setIsSubmitting(false);
+          return;
+        }
+        const newOrderId = await placeOrder(
+          formData,
+          cart,
+          finalTotal,
+          "UPI_QR",
+          `UPI-UTR-${upiUtr.trim()}`
+        );
+        fetch("/api/send-order-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: {
+              id: newOrderId,
+              customer: formData,
+              items: cart,
+              total: finalTotal,
+              razorpayOrderId: "UPI_QR",
+              razorpayPaymentId: `UPI-UTR-${upiUtr.trim()}`,
+            },
+          }),
+        }).catch(console.error);
+        clearCart();
+        setOrderId(newOrderId);
+        setIsSuccess(true);
+      } catch (error) {
+        console.error("UPI order error:", error);
+        alert("Error placing UPI order. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
 
     if (paymentMethod === "cod") {
       try {
@@ -516,53 +582,157 @@ export default function Checkout() {
 
                 {/* Payment Method Selection */}
                 <h3 className="text-lg font-bold mb-4" style={{ color: "var(--text-primary)" }}>
-                  Payment Method
+                  Select Payment Method
                 </h3>
                 <div className="flex flex-col gap-3 mb-8">
-                  <label
-                    className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                      paymentMethod === "online" ? "bg-[#FDF2F3] border-[var(--brand-red)]" : "bg-[var(--surface-muted)] border-[var(--border)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="online"
-                      checked={paymentMethod === "online"}
-                      onChange={(e) => setPaymentMethod(e.target.value as "online" | "cod")}
-                      className="w-4 h-4 text-[var(--brand-red)] focus:ring-[var(--brand-red)]"
-                    />
-                    <div>
-                      <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                        Pay Online (Razorpay)
-                      </p>
-                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        100% Secure. UPI, Cards & NetBanking.
-                      </p>
+                  {/* Direct UPI Scan & Pay */}
+                  {storeSettings?.enableUpiQr !== false && (
+                    <div
+                      onClick={() => setPaymentMethod("upi_qr")}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                        paymentMethod === "upi_qr"
+                          ? "bg-[#FDF2F3] border-[#A01C2C] shadow-sm"
+                          : "bg-[var(--surface-muted)] border-[var(--border)]"
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="upi_qr"
+                          checked={paymentMethod === "upi_qr"}
+                          onChange={() => setPaymentMethod("upi_qr")}
+                          className="w-4 h-4 text-[#A01C2C] focus:ring-[#A01C2C]"
+                        />
+                        <div className="flex-1 flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-sm flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+                              <QrCode className="w-4 h-4 text-[#A01C2C]" />
+                              Instant UPI Scan &amp; Pay (GPay / PhonePe / Paytm / BHIM)
+                            </p>
+                            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                              0% extra fees • Direct Bank to Bank • Fast &amp; Secure
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            Recommended
+                          </span>
+                        </div>
+                      </label>
+
+                      {/* Interactive UPI QR Box if selected */}
+                      {paymentMethod === "upi_qr" && (
+                        <div className="mt-4 pt-4 border-t border-red-100 flex flex-col items-center bg-white p-4 rounded-xl shadow-inner">
+                          <p className="text-xs text-center font-medium text-gray-700 mb-2">
+                            Scan this QR using any UPI app on your phone:
+                          </p>
+                          <div className="p-3 bg-white border border-gray-200 rounded-2xl shadow-sm mb-3">
+                            <img
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                                `upi://pay?pa=${storeSettings?.upiId || "ghartikaspices@okaxis"}&pn=${encodeURIComponent(
+                                  storeSettings?.upiName || "Ghartika Spices"
+                                )}&am=${finalTotal}&cu=INR&tn=${encodeURIComponent("Ghartika Order")}`
+                              )}`}
+                              alt="Ghartika UPI QR"
+                              className="w-44 h-44 object-contain rounded-lg"
+                            />
+                          </div>
+
+                          <div className="w-full text-center mb-3">
+                            <span className="text-xs text-gray-500">Payable Amount:</span>
+                            <p className="text-xl font-extrabold text-[#A01C2C]">₹{finalTotal}</p>
+                            <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                              UPI ID: {storeSettings?.upiId || "ghartikaspices@okaxis"}
+                            </p>
+                          </div>
+
+                          {/* Mobile Direct Pay Button */}
+                          <a
+                            href={`upi://pay?pa=${storeSettings?.upiId || "ghartikaspices@okaxis"}&pn=${encodeURIComponent(
+                              storeSettings?.upiName || "Ghartika Spices"
+                            )}&am=${finalTotal}&cu=INR&tn=${encodeURIComponent("Ghartika Order")}`}
+                            className="w-full py-2.5 px-4 mb-4 rounded-xl text-white text-xs font-bold text-center flex items-center justify-center gap-2 shadow-sm transition hover:opacity-95"
+                            style={{ backgroundColor: "#A01C2C" }}
+                          >
+                            <Smartphone className="w-4 h-4" />
+                            Tap to Pay via UPI App (PhonePe / GPay / Paytm)
+                          </a>
+
+                          {/* UTR Input */}
+                          <div className="w-full text-left">
+                            <label className="block text-xs font-bold text-gray-800 mb-1">
+                              Enter 12-Digit UPI UTR / Transaction ID <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. 431289104523"
+                              value={upiUtr}
+                              onChange={(e) => setUpiUtr(e.target.value)}
+                              className="w-full px-3 py-2 text-sm font-mono border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A01C2C]"
+                              maxLength={20}
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">
+                              Payment hone ke baad aapke UPI app me aane wala 12-digit UTR/Txn number yahan daalein.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </label>
-                  <label
-                    className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                      paymentMethod === "cod" ? "bg-[#F1F8F1] border-[var(--brand-green)]" : "bg-[var(--surface-muted)] border-[var(--border)]"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="cod"
-                      checked={paymentMethod === "cod"}
-                      onChange={(e) => setPaymentMethod(e.target.value as "online" | "cod")}
-                      className="w-4 h-4 text-[var(--brand-green)] focus:ring-[var(--brand-green)]"
-                    />
-                    <div>
-                      <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                        Cash on Delivery (COD)
-                      </p>
-                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        Pay when you receive your order.
-                      </p>
-                    </div>
-                  </label>
+                  )}
+
+                  {/* Razorpay Online */}
+                  {storeSettings?.enableOnlinePayment !== false && (
+                    <label
+                      className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+                        paymentMethod === "online" ? "bg-[#FDF2F3] border-[#A01C2C]" : "bg-[var(--surface-muted)] border-[var(--border)]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="online"
+                        checked={paymentMethod === "online"}
+                        onChange={() => setPaymentMethod("online")}
+                        className="w-4 h-4 text-[#A01C2C] focus:ring-[#A01C2C]"
+                      />
+                      <div>
+                        <p className="font-semibold text-sm flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+                          <CreditCard className="w-4 h-4 text-[#A01C2C]" />
+                          Cards, NetBanking &amp; Wallets (Razorpay)
+                        </p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          Credit / Debit Cards, NetBanking, EMI &amp; Wallets.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+
+                  {/* Cash on Delivery */}
+                  {storeSettings?.enableCod !== false && (
+                    <label
+                      className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+                        paymentMethod === "cod" ? "bg-[#F1F8F1] border-[var(--brand-green)]" : "bg-[var(--surface-muted)] border-[var(--border)]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cod"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="w-4 h-4 text-[var(--brand-green)] focus:ring-[var(--brand-green)]"
+                      />
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                          Cash on Delivery (COD)
+                        </p>
+                        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          Pay cash or UPI when order is delivered at your doorstep.
+                        </p>
+                      </div>
+                    </label>
+                  )}
                 </div>
 
                 <button

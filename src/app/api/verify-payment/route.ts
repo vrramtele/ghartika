@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { getStoreSettings } from "@/lib/db";
 
 // POST /api/verify-payment — verify Razorpay payment signature
 export async function POST(req: Request) {
@@ -14,7 +15,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+    const settings = await getStoreSettings().catch(() => null);
+    const keySecret = settings?.razorpayKeySecret || process.env.RAZORPAY_KEY_SECRET || "";
 
     // If using placeholder keys, mock-verify (for dev/demo)
     if (

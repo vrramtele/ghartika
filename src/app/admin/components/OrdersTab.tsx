@@ -231,9 +231,14 @@ function OrderDetail({
             </p>
           </div>
           {/* Payment */}
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.border}`, display: "flex", gap: 16, fontSize: 12 }}>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.border}`, display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12 }}>
             <span style={{ color: C.muted }}>Method: <strong style={{ color: C.text }}>{order.paymentMethod ?? "COD"}</strong></span>
             <span style={{ color: C.muted }}>Status: <strong style={{ color: order.paymentStatus === "Paid" ? "#15803d" : C.text }}>{order.paymentStatus ?? "Pending"}</strong></span>
+            {order.razorpayPaymentId && (
+              <span style={{ color: C.muted }}>
+                Txn/UTR: <strong style={{ color: C.red, fontFamily: "monospace" }}>{order.razorpayPaymentId}</strong>
+              </span>
+            )}
           </div>
         </div>
 
