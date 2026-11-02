@@ -17,9 +17,7 @@ export default function AdminLayout({
   return (
     <ProductProvider>
       <OrderProvider>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        {children}
       </OrderProvider>
     </ProductProvider>
   );

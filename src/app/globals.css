@@ -46,3 +46,197 @@ body {
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand-red); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GHARTIKA ADMIN — PURE NEUMORPHISM DESIGN SYSTEM
+   Base Canvas: #E9E5DF (Soft Warm Pearl Canvas)
+   Dark Shadow: #C8C2BA (Bottom-Right)
+   Light Highlight: #FFFFFF (Top-Left)
+   Brand Accent: #A01C2C (Ghartika Red from user swatch)
+───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --nm-base: #E9E5DF;
+  --nm-shadow-dark: #C8C2BA;
+  --nm-shadow-light: #FFFFFF;
+  --nm-red: #A01C2C;
+  --nm-red-hover: #851624;
+  --nm-red-glow: rgba(160, 28, 44, 0.25);
+  --nm-text: #1A1410;
+  --nm-muted: #7D756C;
+}
+
+body:has(.admin-main-wrap) {
+  background-color: var(--nm-base) !important;
+  color: var(--nm-text) !important;
+}
+
+.admin-main-wrap {
+  background-color: var(--nm-base) !important;
+}
+
+/* Pure Neumorphic Raised Containers (Cards across all Tabs) */
+.admin-main-wrap > main > div > div,
+.admin-main-wrap div[style*="borderRadius: 16"],
+.admin-main-wrap div[style*="borderRadius: 18"],
+.admin-main-wrap div[style*="borderRadius: 14"],
+.admin-main-wrap div[style*="borderRadius: 12"],
+.admin-main-wrap div[style*="border-radius: 16px"],
+.admin-main-wrap div[style*="border-radius: 18px"],
+.admin-main-wrap div[style*="border-radius: 14px"],
+.admin-main-wrap div[style*="border-radius: 12px"] {
+  background-color: var(--nm-base) !important;
+  box-shadow: 6px 6px 14px var(--nm-shadow-dark), -6px -6px 14px var(--nm-shadow-light) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Pure Neumorphic Inset (Inputs, Textareas, Selects) */
+.admin-main-wrap input[type="text"],
+.admin-main-wrap input[type="search"],
+.admin-main-wrap input[type="number"],
+.admin-main-wrap input[type="date"],
+.admin-main-wrap input[type="email"],
+.admin-main-wrap input[type="password"],
+.admin-main-wrap textarea,
+.admin-main-wrap select {
+  background-color: var(--nm-base) !important;
+  box-shadow: inset 3px 3px 6px var(--nm-shadow-dark), inset -3px -3px 6px var(--nm-shadow-light) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: var(--nm-text) !important;
+  font-family: var(--font-outfit), sans-serif !important;
+  font-weight: 600 !important;
+  transition: box-shadow 0.2s ease !important;
+}
+
+.admin-main-wrap input:focus,
+.admin-main-wrap textarea:focus,
+.admin-main-wrap select:focus {
+  outline: none !important;
+  box-shadow: inset 3px 3px 6px var(--nm-shadow-dark), inset -3px -3px 6px var(--nm-shadow-light), 0 0 0 2px var(--nm-red) !important;
+}
+
+/* Primary Action Buttons (Ghartika Red #A01C2C Raised) */
+.admin-main-wrap button[style*="background: rgb(160, 28, 44)"],
+.admin-main-wrap button[style*="background:#A01C2C"],
+.admin-main-wrap button[style*="background: #A01C2C"],
+.admin-main-wrap button[type="submit"] {
+  background: linear-gradient(135deg, #A01C2C 0%, #851624 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark), -4px -4px 10px var(--nm-shadow-light), 0 4px 14px var(--nm-red-glow) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.admin-main-wrap button[style*="background: rgb(160, 28, 44)"]:hover,
+.admin-main-wrap button[style*="background:#A01C2C"]:hover,
+.admin-main-wrap button[style*="background: #A01C2C"]:hover,
+.admin-main-wrap button[type="submit"]:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 5px 5px 14px var(--nm-shadow-dark), -5px -5px 14px var(--nm-shadow-light), 0 6px 18px var(--nm-red-glow) !important;
+}
+
+.admin-main-wrap button[style*="background: rgb(160, 28, 44)"]:active,
+.admin-main-wrap button[style*="background:#A01C2C"]:active,
+.admin-main-wrap button[style*="background: #A01C2C"]:active,
+.admin-main-wrap button[type="submit"]:active {
+  transform: translateY(1px) !important;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.4), inset -2px -2px 6px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Secondary / Normal Buttons (Neumorphic Raised) */
+.admin-main-wrap button:not([style*="background: none"]):not([style*="background: transparent"]):not([style*="background: rgb(160, 28, 44)"]):not([style*="background:#A01C2C"]):not([style*="background: #A01C2C"]):not([type="submit"]) {
+  background-color: var(--nm-base) !important;
+  box-shadow: 3px 3px 8px var(--nm-shadow-dark), -3px -3px 8px var(--nm-shadow-light) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 10px !important;
+  color: var(--nm-text) !important;
+  font-weight: 700 !important;
+  transition: all 0.15s ease !important;
+}
+
+.admin-main-wrap button:not([style*="background: none"]):not([style*="background: transparent"]):not([style*="background: rgb(160, 28, 44)"]):not([style*="background:#A01C2C"]):not([style*="background: #A01C2C"]):not([type="submit"]):hover {
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark), -4px -4px 10px var(--nm-shadow-light) !important;
+}
+
+.admin-main-wrap button:not([style*="background: none"]):not([style*="background: transparent"]):not([style*="background: rgb(160, 28, 44)"]):not([style*="background:#A01C2C"]):not([style*="background: #A01C2C"]):not([type="submit"]):active {
+  box-shadow: inset 2px 2px 5px var(--nm-shadow-dark), inset -2px -2px 5px var(--nm-shadow-light) !important;
+}
+
+/* Tables & Trays across all Tabs */
+.admin-main-wrap table {
+  background-color: transparent !important;
+}
+
+.admin-main-wrap thead tr {
+  background-color: transparent !important;
+  border-bottom: 2px solid var(--nm-shadow-dark) !important;
+}
+
+.admin-main-wrap thead th {
+  color: var(--nm-muted) !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 10px 16px !important;
+}
+
+.admin-main-wrap tbody tr {
+  border-top: 1px solid rgba(200, 194, 186, 0.4) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.admin-main-wrap tbody tr:hover {
+  background-color: rgba(200, 194, 186, 0.18) !important;
+}
+
+/* Custom Neumorphic Checkbox */
+.admin-main-wrap input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  background-color: var(--nm-base) !important;
+  box-shadow: inset 2px 2px 4px var(--nm-shadow-dark), inset -2px -2px 4px var(--nm-shadow-light) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  display: inline-grid !important;
+  place-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.admin-main-wrap input[type="checkbox"]:checked {
+  background: var(--nm-red) !important;
+  box-shadow: 2px 2px 5px var(--nm-shadow-dark), 0 2px 6px var(--nm-red-glow) !important;
+}
+
+.admin-main-wrap input[type="checkbox"]:checked::before {
+  content: "" !important;
+  width: 9px !important;
+  height: 5px !important;
+  border-left: 2px solid white !important;
+  border-bottom: 2px solid white !important;
+  transform: rotate(-45deg) translate(1px, -1px) !important;
+}
+
+/* Smooth Tactile Scrollbars */
+.admin-main-wrap ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+.admin-main-wrap ::-webkit-scrollbar-track {
+  background: var(--nm-base);
+  box-shadow: inset 1px 1px 3px var(--nm-shadow-dark);
+  border-radius: 10px;
+}
+.admin-main-wrap ::-webkit-scrollbar-thumb {
+  background: var(--nm-shadow-dark);
+  border-radius: 10px;
+}
+.admin-main-wrap ::-webkit-scrollbar-thumb:hover {
+  background: var(--nm-red);
+}
+

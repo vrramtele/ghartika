@@ -1,20 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import type { Product } from "@/types";
 
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  weight: string;
-  category: string;
-  image: string;
-  badge?: string;
-  description: string;
-  isCombo?: boolean;
-  comboItems?: string[];
-};
+export type { Product };
 
 type ProductContextType = {
   products: Product[];

@@ -1,59 +1,43 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useOrders, OrderStatus } from "@/context/OrderContext";
-import { Product } from "@/data/products";
+import { useState, useEffect, useMemo } from "react";
+import { useOrders } from "@/context/OrderContext";
 import { useProducts } from "@/context/ProductContext";
+import type { Order, OrderStatus } from "@/types";
+import type { AdminTab } from "./components/AdminShell";
+import { AdminShell, C, nm } from "./components/AdminShell";
+import { DashboardTab } from "./components/DashboardTab";
+import { OrdersTab } from "./components/OrdersTab";
+import { ProductsTab } from "./components/ProductsTab";
+import { CustomersTab } from "./components/CustomersTab";
+import { CouponsTab } from "./components/CouponsTab";
+import { AbandonedCartsTab } from "./components/AbandonedCartsTab";
+import { ReviewsTab } from "./components/ReviewsTab";
+import { StorefrontTab } from "./components/StorefrontTab";
+import { InventoryTab } from "./components/InventoryTab";
+import { ReportsTab } from "./components/ReportsTab";
+import { StaffTab } from "./components/StaffTab";
+import { CategoriesTab } from "./components/CategoriesTab";
+import { MediaLibraryTab } from "./components/MediaLibraryTab";
+import { SuppliersTab } from "./components/SuppliersTab";
+import { FinanceTab } from "./components/FinanceTab";
+import { SEOTab } from "./components/SEOTab";
+import { NotificationsTab } from "./components/NotificationsTab";
+import { SettingsTab } from "./components/SettingsTab";
+import { HealthTab } from "./components/HealthTab";
+import { CostingDashboardTab } from "./components/CostingDashboardTab";
+import { ProductCostingTab } from "./components/ProductCostingTab";
+import { RawMaterialsTab } from "./components/RawMaterialsTab";
+import { RecipesProductionTab } from "./components/RecipesProductionTab";
+import { CostHistoryTab } from "./components/CostHistoryTab";
+import { ProfitReportsTab } from "./components/ProfitReportsTab";
+import { CostingSettingsTab } from "./components/CostingSettingsTab";
 import {
-  Package, ShoppingBag, Users, TrendingUp,
-  ChevronDown, ChevronUp, Search, Filter,
-  Phone, Mail, MapPin, Clock, CheckCircle2,
-  Truck, XCircle, AlertCircle, BarChart2,
-  ArrowUpRight, RefreshCw, LogOut, Lock,
-  Eye, EyeOff, Store, Plus, Trash2, Edit3,
-  Save, X, IndianRupee, ShoppingCart, Menu
+  Lock, Eye, EyeOff, AlertCircle, IndianRupee, TrendingUp,
+  CheckCircle2, Banknote, CreditCard, MapPin, Award,
 } from "lucide-react";
 
-// ── Constants ──────────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = "admin123";
-
-// Website Theme Colors
-const BRAND_RED = "#A01C2C";
-const BRAND_RED_HOVER = "#7B1521";
-const BRAND_GOLD = "#B8860B";
-const BG_MAIN = "#FEFCF8";
-const BG_SURFACE = "#FFFFFF";
-const TEXT_PRIMARY = "#1A1008";
-const TEXT_MUTED = "#9A8570";
-const BORDER_COLOR = "#E8DDD0";
-
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
-  Pending:    { label: "Pending",    color: "#b45309", bg: "#fef3c7", border: "#fde68a", icon: <Clock className="w-3.5 h-3.5" /> },
-  Processing: { label: "Processing", color: "#1d4ed8", bg: "#dbeafe", border: "#bfdbfe", icon: <RefreshCw className="w-3.5 h-3.5" /> },
-  Shipped:    { label: "Shipped",    color: "#6d28d9", bg: "#ede9fe", border: "#ddd6fe", icon: <Truck className="w-3.5 h-3.5" /> },
-  Delivered:  { label: "Delivered",  color: "#15803d", bg: "#dcfce7", border: "#bbf7d0", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
-  Cancelled:  { label: "Cancelled",  color: "#b91c1c", bg: "#fee2e2", border: "#fecaca", icon: <XCircle className="w-3.5 h-3.5" /> },
-};
-
-const ALL_STATUSES: OrderStatus[] = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-
-// ── Sub-components ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const cfg = STATUS_CONFIG[status];
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: "6px",
-      padding: "4px 10px", borderRadius: "99px", fontSize: "12px",
-      fontWeight: 600, color: cfg.color, backgroundColor: cfg.bg,
-      border: `1px solid ${cfg.border}`
-    }}>
-      {cfg.icon}
-      {cfg.label}
-    </span>
-  );
-}
-
-// ── Login Screen ───────────────────────────────────────────────────────────────
+// ── Login Screen (Neumorphic) ─────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
@@ -73,7 +57,8 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
       if (res.ok) {
         onLogin();
       } else {
-        setError("Galat password! Dobara try karo.");
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Galat password! Dobara try karo.");
         setShaking(true);
         setTimeout(() => setShaking(false), 600);
         setPassword("");
@@ -86,84 +71,75 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: BG_MAIN,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "var(--font-outfit), sans-serif",
-    }}>
+    <div style={{ minHeight: "100vh", background: C.base, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), sans-serif", padding: 20 }}>
       <div style={{
-        background: BG_SURFACE,
-        border: `1px solid ${BORDER_COLOR}`,
-        borderRadius: "24px",
-        padding: "48px",
-        width: "100%",
-        maxWidth: "420px",
-        boxShadow: "0 10px 40px rgba(160,28,44,0.08)",
+        background: C.base,
+        borderRadius: 28,
+        padding: "48px 40px",
+        width: "100%", maxWidth: 420,
+        boxShadow: nm.raised,
         position: "relative",
-        animation: shaking ? "shake 0.5s ease-in-out" : "none",
+        animation: shaking ? "shake 0.5s ease-in-out" : "none"
       }}>
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{
-            width: "64px", height: "64px", borderRadius: "16px",
-            background: BRAND_RED,
+            width: 68, height: 68, borderRadius: 20,
+            background: C.base,
+            boxShadow: nm.raisedSm,
             display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px",
-            boxShadow: `0 8px 24px rgba(160,28,44,0.2)`,
+            margin: "0 auto 18px",
           }}>
-            <Lock style={{ width: "28px", height: "28px", color: "white" }} />
+            <div style={{
+              width: 44, height: 44, borderRadius: 14,
+              background: C.red,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 14px rgba(160,28,44,0.4)"
+            }}>
+              <Lock style={{ width: 22, height: 22, color: "white" }} />
+            </div>
           </div>
-          <h1 style={{ color: TEXT_PRIMARY, fontSize: "28px", fontWeight: 800, margin: 0 }}>
-            Ghartika
-            <span style={{ color: BRAND_RED, marginLeft: "6px" }}>Admin</span>
+          <h1 style={{ color: C.text, fontSize: 26, fontWeight: 900, margin: 0, letterSpacing: "-0.5px" }}>
+            Ghartika <span style={{ color: C.red }}>Admin</span>
           </h1>
-          <p style={{ color: TEXT_MUTED, fontSize: "14px", marginTop: "6px" }}>
-            Secure Dashboard Login
-          </p>
+          <p style={{ color: C.muted, fontSize: 13, marginTop: 6, fontWeight: 500 }}>Secure Dashboard Access</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ color: TEXT_PRIMARY, fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "8px" }}>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ color: C.textSub, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 10 }}>
               Admin Password
             </label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPwd ? "text" : "password"}
                 value={password}
-                onChange={e => { setPassword(e.target.value); setError(""); }}
+                onChange={(e) => { setPassword(e.target.value); setError(""); }}
                 placeholder="••••••••"
                 autoFocus
                 style={{
-                  width: "100%",
-                  padding: "14px 48px 14px 16px",
-                  background: BG_MAIN,
-                  border: error ? `1px solid ${BRAND_RED}` : `1px solid ${BORDER_COLOR}`,
-                  borderRadius: "12px",
-                  color: TEXT_PRIMARY,
-                  fontSize: "15px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  fontFamily: "var(--font-outfit), sans-serif",
+                  width: "100%", padding: "15px 48px 15px 18px",
+                  background: C.base,
+                  boxShadow: error ? `inset 2px 2px 5px ${C.shadowDark}, inset -2px -2px 5px ${C.shadowLight}, 0 0 0 1.5px ${C.red}` : nm.inset,
+                  border: "none",
+                  borderRadius: 14,
+                  color: C.text, fontSize: 15, outline: "none",
+                  boxSizing: "border-box", fontFamily: "var(--font-outfit), sans-serif",
+                  fontWeight: 600,
                 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPwd(!showPwd)}
                 style={{
-                  position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", cursor: "pointer", color: TEXT_MUTED, padding: 0,
-                }}
-              >
-                {showPwd ? <EyeOff style={{ width: "18px", height: "18px" }} /> : <Eye style={{ width: "18px", height: "18px" }} />}
+                  position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer", color: C.muted, padding: 4
+                }}>
+                {showPwd ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
               </button>
             </div>
             {error && (
-              <p style={{ color: BRAND_RED, fontSize: "13px", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px", fontWeight: 500 }}>
-                <AlertCircle style={{ width: "14px", height: "14px" }} /> {error}
+              <p style={{ color: C.red, fontSize: 12.5, marginTop: 10, display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                <AlertCircle style={{ width: 14, height: 14 }} /> {error}
               </p>
             )}
           </div>
@@ -172,363 +148,161 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
             type="submit"
             disabled={loading}
             style={{
-              width: "100%",
-              padding: "14px",
-              background: loading ? BRAND_RED_HOVER : BRAND_RED,
-              border: "none",
-              borderRadius: "12px",
-              color: "white",
-              fontSize: "15px",
-              fontWeight: 700,
+              width: "100%", padding: 15,
+              background: C.red,
+              border: "none", borderRadius: 14,
+              color: "white", fontSize: 15, fontWeight: 800,
               cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: `0 4px 15px rgba(160,28,44,0.3)`,
-              transition: "background 0.2s, transform 0.1s",
+              boxShadow: "0 6px 20px rgba(160,28,44,0.35)",
               fontFamily: "var(--font-outfit), sans-serif",
-              opacity: loading ? 0.8 : 1,
+              opacity: loading ? 0.75 : 1,
+              transition: "all 0.15s ease",
             }}
-            onMouseOver={e => { if (!loading) (e.target as HTMLButtonElement).style.background = BRAND_RED_HOVER; }}
-            onMouseOut={e => { if (!loading) (e.target as HTMLButtonElement).style.background = BRAND_RED; }}
           >
-            {loading ? "Logging in..." : "Login to Dashboard"}
+            {loading ? "Verifying..." : "Login to Panel"}
           </button>
         </form>
       </div>
-
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-10px); }
-          40%, 80% { transform: translateX(10px); }
-        }
-      `}</style>
+      <style>{`@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-10px)} 40%,80%{transform:translateX(10px)} }`}</style>
     </div>
   );
 }
 
-// ── Products Manager ────────────────────────────────────────────────────────────
-function ProductsTab() {
-  const { products: prods, addProduct, updateProduct, deleteProduct } = useProducts();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-
-  const emptyProduct: Omit<Product, "id"> = {
-    name: "", price: 0, weight: "", category: "Everyday Essentials",
-    image: "/images/red-chili.jpg", description: "", badge: "",
-  };
-  const [form, setForm] = useState<Omit<Product, "id">>(emptyProduct);
-
-  const handleEdit = (p: Product) => {
-    setEditingId(p.id);
-    setForm({ name: p.name, price: p.price, weight: p.weight, category: p.category, image: p.image, description: p.description, badge: p.badge || "" });
-    setShowAdd(false);
+// ── Analytics Tab (Enhanced with COD vs Online & Metrics) ────────────────────
+function AnalyticsTab({ orders }: { orders: Order[] }) {
+  const ALL_STATUSES: OrderStatus[] = ["Pending", "Confirmed", "Packed", "Shipped", "Delivered", "Cancelled", "Returned"];
+  const STATUS_COLORS: Record<OrderStatus, string> = {
+    Pending: "#b45309", Confirmed: "#1d4ed8", Packed: "#7c3aed",
+    Shipped: "#0369a1", Delivered: "#15803d", Cancelled: "#b91c1c", Returned: "#9a3412",
   };
 
-  const handleSave = async (id: string) => {
-    await updateProduct(id, form);
-    setEditingId(null);
-  };
-
-  const handleAdd = async () => {
-    await addProduct(form);
-    setShowAdd(false);
-    setForm(emptyProduct);
-  };
-
-  const handleDelete = async (id: string) => {
-    await deleteProduct(id);
-    setDeleteConfirm(null);
-  };
-
-  const categories = ["Everyday Essentials", "Premium Blends", "Combos"];
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: TEXT_PRIMARY }}>Products Inventory</h2>
-          <p style={{ margin: "4px 0 0", color: TEXT_MUTED, fontSize: "14px" }}>{prods.length} products total</p>
-        </div>
-        <button
-          onClick={() => { setShowAdd(!showAdd); setEditingId(null); setForm(emptyProduct); }}
-          style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            padding: "10px 20px", background: BRAND_RED,
-            border: "none", borderRadius: "10px", color: "white", fontWeight: 600,
-            cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-outfit), sans-serif",
-          }}
-        >
-          <Plus style={{ width: "16px", height: "16px" }} />
-          Add Product
-        </button>
-      </div>
-
-      {showAdd && (
-        <div style={{
-          background: BG_MAIN, border: `1px solid ${BRAND_RED}`, borderRadius: "16px", padding: "24px", marginBottom: "20px",
-        }}>
-          <h3 style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: 700, color: TEXT_PRIMARY }}>
-            ✨ New Product
-          </h3>
-          <ProductForm form={form} setForm={setForm} categories={categories} />
-          <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-            <button onClick={handleAdd} style={btnStyle("green")}>
-              <Save style={{ width: "14px", height: "14px" }} /> Save
-            </button>
-            <button onClick={() => setShowAdd(false)} style={btnStyle("gray")}>
-              <X style={{ width: "14px", height: "14px" }} /> Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "grid", gap: "12px" }}>
-        {prods.map(p => (
-          <div key={p.id} style={{
-            background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px",
-            overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-          }}>
-            {editingId === p.id ? (
-              <div style={{ padding: "20px" }}>
-                <h4 style={{ margin: "0 0 16px", fontSize: "15px", fontWeight: 600, color: TEXT_PRIMARY }}>
-                  ✏️ Edit: {p.name}
-                </h4>
-                <ProductForm form={form} setForm={setForm} categories={categories} />
-                <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-                  <button onClick={() => handleSave(p.id)} style={btnStyle("green")}>
-                    <Save style={{ width: "14px", height: "14px" }} /> Save
-                  </button>
-                  <button onClick={() => setEditingId(null)} style={btnStyle("gray")}>
-                    <X style={{ width: "14px", height: "14px" }} /> Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px 20px" }}>
-                <div style={{
-                  width: "52px", height: "52px", borderRadius: "12px",
-                  background: BG_MAIN, border: `1px solid ${BORDER_COLOR}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "24px", flexShrink: 0,
-                }}>
-                  🌶️
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 700, color: TEXT_PRIMARY, fontSize: "15px" }}>{p.name}</span>
-                    {p.badge && (
-                      <span style={{ fontSize: "11px", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", padding: "2px 8px", borderRadius: "99px", fontWeight: 600 }}>
-                        {p.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", gap: "16px", marginTop: "4px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "13px", color: TEXT_MUTED }}>📦 {p.weight}</span>
-                    <span style={{ fontSize: "13px", color: TEXT_MUTED }}>🏷️ {p.category}</span>
-                    <span style={{ fontSize: "14px", fontWeight: 700, color: BRAND_RED }}>₹{p.price}</span>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => handleEdit(p)} style={btnStyle("gray")}>
-                    <Edit3 style={{ width: "13px", height: "13px" }} /> Edit
-                  </button>
-                  {deleteConfirm === p.id ? (
-                    <>
-                      <button onClick={() => handleDelete(p.id)} style={btnStyle("red")}>Confirm?</button>
-                      <button onClick={() => setDeleteConfirm(null)} style={btnStyle("gray")}>
-                        <X style={{ width: "14px", height: "14px" }} />
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={() => setDeleteConfirm(p.id)} style={{ padding: "8px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", cursor: "pointer", fontFamily: "var(--font-outfit), sans-serif" }}>
-                      <Trash2 style={{ width: "14px", height: "14px", color: "#dc2626" }} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProductForm({ form, setForm, categories }: {
-  form: Omit<Product, "id">;
-  setForm: React.Dispatch<React.SetStateAction<Omit<Product, "id">>>;
-  categories: string[];
-}) {
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "10px 12px", border: `1px solid ${BORDER_COLOR}`,
-    borderRadius: "8px", fontSize: "14px", outline: "none",
-    fontFamily: "var(--font-outfit), sans-serif", boxSizing: "border-box",
-    color: TEXT_PRIMARY, background: BG_MAIN,
-  };
-
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-      <div style={{ gridColumn: "1 / -1" }}>
-        <label style={labelStyle}>Product Name</label>
-        <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Red Chilli Powder" />
-      </div>
-      <div>
-        <label style={labelStyle}>Price (₹)</label>
-        <input style={inputStyle} type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} placeholder="150" />
-      </div>
-      <div>
-        <label style={labelStyle}>Weight</label>
-        <input style={inputStyle} value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} placeholder="250g" />
-      </div>
-      <div>
-        <label style={labelStyle}>Category</label>
-        <select style={inputStyle} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-          {categories.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
-      <div>
-        <label style={labelStyle}>Badge (optional)</label>
-        <input style={inputStyle} value={form.badge || ""} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="🔥 Best Seller" />
-      </div>
-      <div style={{ gridColumn: "1 / -1" }}>
-        <label style={labelStyle}>Image URL</label>
-        <input style={inputStyle} value={form.image || ""} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="e.g. /images/red-chili.jpg or https://..." />
-      </div>
-      <div style={{ gridColumn: "1 / -1" }}>
-        <label style={labelStyle}>Description</label>
-        <textarea
-          style={{ ...inputStyle, minHeight: "80px", resize: "vertical" }}
-          value={form.description}
-          onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-          placeholder="Product description..."
-        />
-      </div>
-    </div>
-  );
-}
-
-const labelStyle: React.CSSProperties = {
-  display: "block", fontSize: "12px", fontWeight: 600, color: TEXT_MUTED,
-  marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px",
-};
-
-function btnStyle(variant: "green" | "gray" | "red"): React.CSSProperties {
-  const variants = {
-    green: { background: "#dcfce7", border: "1px solid #86efac", color: "#15803d" },
-    gray:  { background: BG_MAIN, border: `1px solid ${BORDER_COLOR}`, color: TEXT_PRIMARY },
-    red:   { background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626" },
-  };
-  return {
-    display: "flex", alignItems: "center", gap: "6px",
-    padding: "9px 16px", borderRadius: "8px",
-    fontSize: "13px", fontWeight: 600, cursor: "pointer",
-    fontFamily: "var(--font-outfit), sans-serif",
-    ...variants[variant],
-  };
-}
-
-// ── Analytics Tab ──────────────────────────────────────────────────────────────
-function AnalyticsTab({ orders }: { orders: ReturnType<typeof useOrders>["orders"] }) {
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    ALL_STATUSES.forEach(s => { counts[s] = 0; });
-    orders.forEach(o => { counts[o.status] = (counts[o.status] || 0) + 1; });
-    return counts;
+    const c: Record<string, number> = {};
+    ALL_STATUSES.forEach((s) => { c[s] = 0; });
+    orders.forEach((o) => { c[o.status] = (c[o.status] || 0) + 1; });
+    return c;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orders]);
 
   const productRevenue = useMemo(() => {
     const map: Record<string, { name: string; quantity: number; revenue: number }> = {};
-    orders.forEach(order => {
-      order.items.forEach(item => {
-        if (!map[item.id]) map[item.id] = { name: item.name, quantity: 0, revenue: 0 };
-        map[item.id].quantity += item.quantity;
-        map[item.id].revenue += item.price * item.quantity;
-      });
-    });
+    orders.forEach((o) => o.items.forEach((item) => {
+      if (!map[item.id]) map[item.id] = { name: item.name, quantity: 0, revenue: 0 };
+      map[item.id].quantity += item.quantity;
+      map[item.id].revenue += item.price * item.quantity;
+    }));
     return Object.values(map).sort((a, b) => b.revenue - a.revenue);
   }, [orders]);
 
-  const dailyRevenue = useMemo(() => {
-    const map: Record<string, number> = {};
-    orders.forEach(o => {
-      const date = new Date(o.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
-      map[date] = (map[date] || 0) + o.total;
+  // Top cities breakdown
+  const cityBreakdown = useMemo(() => {
+    const map: Record<string, { orders: number; revenue: number }> = {};
+    orders.forEach((o) => {
+      const city = o.customer.city?.trim() || "Unknown";
+      if (!map[city]) map[city] = { orders: 0, revenue: 0 };
+      map[city].orders += 1;
+      map[city].revenue += o.total;
     });
-    return Object.entries(map).slice(-7).map(([date, revenue]) => ({ date, revenue }));
+    return Object.entries(map)
+      .map(([city, data]) => ({ city, ...data }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
   }, [orders]);
 
-  const maxRevenue = Math.max(...dailyRevenue.map(d => d.revenue), 1);
   const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
   const avgOrderValue = orders.length ? Math.round(totalRevenue / orders.length) : 0;
-  const deliveredRevenue = orders.filter(o => o.status === "Delivered").reduce((s, o) => s + o.total, 0);
+  const deliveredRevenue = orders.filter((o) => o.status === "Delivered").reduce((s, o) => s + o.total, 0);
+  const codOrders = orders.filter((o) => (o.paymentMethod ?? "COD") === "COD").length;
+  const onlineOrders = orders.filter((o) => o.paymentMethod === "Online").length;
+  const codPercentage = orders.length ? Math.round((codOrders / orders.length) * 100) : 0;
 
   return (
-    <div style={{ display: "grid", gap: "20px" }}>
-      {/* Summary cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+    <div style={{ display: "grid", gap: 24 }}>
+      {/* Top metrics cards — Pure Neumorphic */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 16 }}>
         {[
-          { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: "💰", color: BRAND_RED },
-          { label: "Avg Order", value: `₹${avgOrderValue}`, icon: "📊", color: BRAND_GOLD },
-          { label: "Delivered", value: `₹${deliveredRevenue.toLocaleString("en-IN")}`, icon: "✅", color: "#15803d" },
-          { label: "Pending", value: statusCounts["Pending"].toString(), icon: "⏳", color: "#b45309" },
+          { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: <IndianRupee style={{ width: 17, height: 17 }} />, iconColor: C.red },
+          { label: "Avg Order Value", value: `₹${avgOrderValue.toLocaleString("en-IN")}`, icon: <TrendingUp style={{ width: 17, height: 17 }} />, iconColor: "#16A34A" },
+          { label: "Delivered Revenue", value: `₹${deliveredRevenue.toLocaleString("en-IN")}`, icon: <CheckCircle2 style={{ width: 17, height: 17 }} />, iconColor: "#15803D" },
+          { label: "COD Orders", value: `${codOrders} (${codPercentage}%)`, icon: <Banknote style={{ width: 17, height: 17 }} />, iconColor: "#B45309" },
+          { label: "Online Orders", value: `${onlineOrders} (${100 - codPercentage}%)`, icon: <CreditCard style={{ width: 17, height: 17 }} />, iconColor: "#1D4ED8" },
         ].map((card, i) => (
-          <div key={i} style={{
-            background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px",
-            padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-          }}>
-            <div style={{ fontSize: "28px", marginBottom: "8px" }}>{card.icon}</div>
-            <p style={{ margin: 0, fontSize: "13px", color: TEXT_MUTED, fontWeight: 600 }}>{card.label}</p>
-            <p style={{ margin: "4px 0 0", fontSize: "22px", fontWeight: 800, color: card.color }}>{card.value}</p>
+          <div
+            key={i}
+            style={{
+              background: C.base,
+              borderRadius: 18,
+              padding: "20px 22px",
+              boxShadow: nm.raised,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+              <p style={{ margin: 0, fontSize: 11.5, color: C.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>{card.label}</p>
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: C.base,
+                boxShadow: nm.raisedSm,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: card.iconColor, flexShrink: 0,
+              }}>
+                {card.icon}
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: C.text, letterSpacing: "-0.5px" }}>{card.value}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-        {/* Order Status Distribution */}
-        <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "24px" }}>
-          <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: TEXT_PRIMARY }}>Order Status</h3>
-          {ALL_STATUSES.map(status => {
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        {/* Status breakdown */}
+        <div style={{ background: C.base, borderRadius: 18, padding: 26, boxShadow: nm.raised }}>
+          <h3 style={{ margin: "0 0 20px", fontSize: 15, fontWeight: 800, color: C.text }}>Order Status Breakdown</h3>
+          {ALL_STATUSES.map((status) => {
             const count = statusCounts[status];
             const pct = orders.length ? (count / orders.length) * 100 : 0;
             return (
-              <div key={status} style={{ marginBottom: "14px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: TEXT_PRIMARY }}>{status}</span>
-                  <span style={{ fontSize: "13px", color: TEXT_MUTED }}>{count} orders</span>
+              <div key={status} style={{ marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{status}</span>
+                  <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>{count} orders ({Math.round(pct)}%)</span>
                 </div>
-                <div style={{ height: "8px", background: BG_MAIN, borderRadius: "99px", overflow: "hidden" }}>
-                  <div style={{
-                    height: "100%", width: `${pct}%`, borderRadius: "99px",
-                    background: STATUS_CONFIG[status].color, transition: "width 0.6s ease",
-                  }} />
+                {/* Neumorphic Inset Track */}
+                <div style={{ height: 7, background: C.base, borderRadius: 99, boxShadow: nm.insetSm, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${pct}%`, borderRadius: 99, background: STATUS_COLORS[status], transition: "width 0.6s ease" }} />
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Revenue Bar Chart */}
-        <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "24px" }}>
-          <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: TEXT_PRIMARY }}>Daily Revenue</h3>
-          {dailyRevenue.length === 0 ? (
-            <div style={{ textAlign: "center", color: TEXT_MUTED, fontSize: "14px", marginTop: "40px" }}>
-              <BarChart2 style={{ width: "40px", height: "40px", margin: "0 auto 8px", opacity: 0.3 }} />
-              <p>Koi data nahi abhi</p>
+        {/* Top Cities */}
+        <div style={{ background: C.base, borderRadius: 18, padding: 26, boxShadow: nm.raised }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <div style={{
+              width: 30, height: 30, borderRadius: 8, background: C.base,
+              boxShadow: nm.raisedSm, display: "flex", alignItems: "center", justifyContent: "center", color: C.red
+            }}>
+              <MapPin style={{ width: 15, height: 15 }} />
             </div>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: C.text }}>Top Customer Cities</h3>
+          </div>
+          {cityBreakdown.length === 0 ? (
+            <p style={{ color: C.muted, fontSize: 13 }}>Abhi tak koi city data nahi hai</p>
           ) : (
-            <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: "140px", padding: "0 0 8px" }}>
-              {dailyRevenue.map((d, i) => (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                  <div style={{ fontSize: "10px", color: TEXT_MUTED, fontWeight: 600 }}>
-                    ₹{d.revenue > 999 ? Math.round(d.revenue / 1000) + "k" : d.revenue}
+            <div style={{ display: "grid", gap: 12 }}>
+              {cityBreakdown.map((item, idx) => (
+                <div key={idx} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "10px 14px", borderRadius: 10, background: C.base, boxShadow: nm.raisedSm
+                }}>
+                  <div>
+                    <span style={{ fontWeight: 700, fontSize: 13.5, color: C.text }}>{item.city}</span>
+                    <span style={{ marginLeft: 8, fontSize: 11.5, color: C.muted, fontWeight: 500 }}>{item.orders} orders</span>
                   </div>
-                  <div style={{
-                    width: "100%", borderRadius: "6px 6px 0 0",
-                    height: `${(d.revenue / maxRevenue) * 100}px`,
-                    background: BRAND_RED, minHeight: "4px",
-                    transition: "height 0.5s ease",
-                  }} />
-                  <div style={{ fontSize: "10px", color: TEXT_MUTED, textAlign: "center", whiteSpace: "nowrap" }}>{d.date}</div>
+                  <span style={{ fontWeight: 800, fontSize: 13.5, color: C.red }}>₹{item.revenue.toLocaleString("en-IN")}</span>
                 </div>
               ))}
             </div>
@@ -536,25 +310,40 @@ function AnalyticsTab({ orders }: { orders: ReturnType<typeof useOrders>["orders
         </div>
       </div>
 
-      {/* Top Products */}
-      <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "24px" }}>
-        <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: TEXT_PRIMARY }}>🏆 Top Products</h3>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+      {/* Top Products table */}
+      <div style={{ background: C.base, borderRadius: 18, padding: 26, boxShadow: nm.raised }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: 8, background: C.base,
+            boxShadow: nm.raisedSm, display: "flex", alignItems: "center", justifyContent: "center", color: C.gold
+          }}>
+            <Award style={{ width: 16, height: 16 }} />
+          </div>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: C.text }}>Top Selling Spices</h3>
+        </div>
+
+        <div style={{
+          background: C.base,
+          boxShadow: nm.inset,
+          borderRadius: 14,
+          padding: "8px 14px",
+          overflowX: "auto"
+        }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
-              <tr style={{ background: BG_MAIN }}>
-                {["Rank", "Product", "Qty Sold", "Revenue"].map(h => (
-                  <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: TEXT_MUTED, fontWeight: 600, fontSize: "12px", textTransform: "uppercase" }}>{h}</th>
+              <tr>
+                {["#", "Product", "Qty Sold", "Total Revenue"].map((h) => (
+                  <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: C.muted, fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {productRevenue.map((p, i) => (
-                <tr key={i} style={{ borderTop: `1px solid ${BORDER_COLOR}` }}>
-                  <td style={{ padding: "12px 16px", fontWeight: 700, color: i === 0 ? BRAND_GOLD : TEXT_MUTED }}>#{i + 1}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 600, color: TEXT_PRIMARY }}>{p.name}</td>
-                  <td style={{ padding: "12px 16px", color: TEXT_MUTED }}>{p.quantity} units</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 700, color: BRAND_RED }}>₹{p.revenue.toLocaleString("en-IN")}</td>
+                <tr key={i} style={{ borderTop: `1px solid rgba(200, 194, 186, 0.3)` }}>
+                  <td style={{ padding: "12px 14px", fontWeight: 800, color: i === 0 ? C.red : C.muted }}>#{i + 1}</td>
+                  <td style={{ padding: "12px 14px", fontWeight: 700, color: C.text, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</td>
+                  <td style={{ padding: "12px 14px", color: C.muted, fontWeight: 600 }}>{p.quantity} units</td>
+                  <td style={{ padding: "12px 14px", fontWeight: 800, color: C.red }}>₹{p.revenue.toLocaleString("en-IN")}</td>
                 </tr>
               ))}
             </tbody>
@@ -565,21 +354,20 @@ function AnalyticsTab({ orders }: { orders: ReturnType<typeof useOrders>["orders
   );
 }
 
-// ── Main Dashboard ─────────────────────────────────────────────────────────────
+// ── Main exported component ───────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const { orders, updateOrderStatus, isLoading: ordersLoading, refreshOrders } = useOrders();
-  const { refreshProducts } = useProducts();
+  const { orders, isLoading: ordersLoading, refreshOrders, updateOrderStatus, patchOrder } = useOrders();
+  const { products, isLoading: productsLoading, refreshProducts, addProduct, updateProduct, deleteProduct } = useProducts();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | "All">("All");
+  const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
+  const [pendingReviewsCount, setPendingReviewsCount] = useState(0);
+  const [abandonedCount, setAbandonedCount] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  // Fix hydration mismatch + check JWT cookie via API
+  // Check auth cookie and background counts on mount
   useEffect(() => {
     setMounted(true);
     fetch("/api/admin/auth")
@@ -589,18 +377,48 @@ export default function AdminDashboard() {
           setIsLoggedIn(true);
           refreshOrders();
           refreshProducts();
+          fetchPendingCounts();
         }
       })
       .catch(() => {})
-      .finally(() => {
-        setAuthChecking(false);
-      });
-  }, [refreshOrders, refreshProducts]);
+      .finally(() => setAuthChecking(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchPendingCounts = () => {
+    fetch("/api/reviews")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPendingReviewsCount(data.filter((r) => r.status === "pending").length);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/abandoned-carts")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAbandonedCount(data.filter((c) => !c.recovered).length);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setUnreadNotifications(data.filter((n) => !n.isRead).length);
+        }
+      })
+      .catch(() => {});
+  };
 
   const handleLogin = () => {
     setIsLoggedIn(true);
     refreshOrders();
     refreshProducts();
+    fetchPendingCounts();
   };
 
   const handleLogout = async () => {
@@ -612,51 +430,55 @@ export default function AdminDashboard() {
     setIsLoggedIn(false);
   };
 
-  const handleManualRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await Promise.all([refreshOrders(), refreshProducts()]);
-    } finally {
-      setIsRefreshing(false);
-    }
+  const handleRefresh = async () => {
+    await Promise.all([refreshOrders(), refreshProducts()]);
+    fetchPendingCounts();
   };
 
-  const handleStatusUpdate = async (orderId: string, status: OrderStatus) => {
-    try {
-      await updateOrderStatus(orderId, status);
-    } catch (err) {
-      console.error("Failed to update status:", err);
-      alert("Status update failed. Please try again.");
-    }
+  const handleBulkUpdate = async (ids: string[], status: OrderStatus) => {
+    const res = await fetch("/api/orders/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, status }),
+    });
+    if (!res.ok) throw new Error("Bulk update failed");
+    await refreshOrders();
   };
 
+  const handleDuplicate = async (id: string) => {
+    const res = await fetch(`/api/products/${id}?action=duplicate`, { method: "POST" });
+    if (!res.ok) throw new Error("Duplicate failed");
+    await refreshProducts();
+  };
+
+  const lowStockCount = useMemo(
+    () => products.filter((p) => p.stock !== undefined && p.lowStockThreshold !== undefined && p.stock <= p.lowStockThreshold).length,
+    [products]
+  );
+  const pendingCount = useMemo(
+    () => orders.filter((o) => o.status === "Pending").length,
+    [orders]
+  );
+
+  // Loading / auth states
   if (!mounted || authChecking) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: BG_MAIN,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "var(--font-outfit), sans-serif",
-      }}>
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "14px",
-          color: BRAND_RED,
-          fontWeight: 600,
-        }}>
+      <div style={{ minHeight: "100vh", background: C.base, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), sans-serif" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <div style={{
-            width: "40px",
-            height: "40px",
-            border: `3px solid ${BORDER_COLOR}`,
-            borderTopColor: BRAND_RED,
-            borderRadius: "50%",
-            animation: "adminSpin 0.8s linear infinite"
-          }} />
-          <span style={{ fontSize: "14px", color: TEXT_MUTED }}>Loading Admin Panel...</span>
+            width: 54, height: 54, borderRadius: 16,
+            background: C.base, boxShadow: nm.raisedSm,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{
+              width: 24, height: 24,
+              border: `2.5px solid ${C.shadowDark}`,
+              borderTopColor: C.red,
+              borderRadius: "50%",
+              animation: "adminSpin 0.8s linear infinite"
+            }} />
+          </div>
+          <span style={{ fontSize: 13, color: C.muted, fontWeight: 600 }}>Loading Ghartika Admin...</span>
           <style>{`@keyframes adminSpin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -665,543 +487,103 @@ export default function AdminDashboard() {
 
   if (!isLoggedIn) return <LoginScreen onLogin={handleLogin} />;
 
-  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-  const totalCustomers = new Set(orders.map(o => o.customer.phone)).size;
-  const pendingOrders = orders.filter(o => o.status === "Pending").length;
-
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch =
-      !searchQuery ||
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.phone.includes(searchQuery);
-    const matchesStatus = statusFilter === "All" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const customers = (() => {
-    const map: Record<string, { info: typeof orders[0]["customer"]; orders: typeof orders; totalSpent: number }> = {};
-    for (const order of orders) {
-      const key = order.customer.phone;
-      if (!map[key]) map[key] = { info: order.customer, orders: [], totalSpent: 0 };
-      map[key].orders.push(order);
-      map[key].totalSpent += order.total;
-    }
-    return Object.values(map);
-  })();
-
-  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
-  });
-
-  const navItems = [
-    { id: "dashboard", label: "Dashboard",  icon: <BarChart2 className="w-4 h-4" />,    badge: null },
-    { id: "analytics", label: "Analytics",  icon: <TrendingUp className="w-4 h-4" />,   badge: null },
-    { id: "orders",    label: "Orders",     icon: <ShoppingBag className="w-4 h-4" />,  badge: pendingOrders > 0 ? pendingOrders : null },
-    { id: "customers", label: "Customers",  icon: <Users className="w-4 h-4" />,        badge: null },
-    { id: "products",  label: "Products",   icon: <Package className="w-4 h-4" />,      badge: null },
-  ];
-
-  const tabLabels: Record<string, string> = {
-    dashboard: "Dashboard", analytics: "Analytics",
-    orders: "Orders", customers: "Customers", products: "Products",
-  };
-
   return (
-    <div style={{ minHeight: "100vh", background: BG_MAIN, display: "flex", fontFamily: "var(--font-outfit), sans-serif", position: "relative" }}>
-      {/* ── Mobile Backdrop ── */}
-      {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 45,
-          }}
+    <AdminShell
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      onLogout={handleLogout}
+      onRefresh={handleRefresh}
+      pendingCount={pendingCount}
+      lowStockCount={lowStockCount}
+      abandonedCount={abandonedCount}
+      pendingReviewsCount={pendingReviewsCount}
+      unreadNotifications={unreadNotifications}
+    >
+      {activeTab === "dashboard" && (
+        <DashboardTab
+          orders={orders}
+          products={products}
+          onNavTo={(tab) => setActiveTab(tab)}
         />
       )}
 
-      {/* ── Sidebar ── */}
-      <aside
-        className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}
-        style={{
-          width: "240px", background: BG_SURFACE, borderRight: `1px solid ${BORDER_COLOR}`,
-          display: "flex", flexDirection: "column", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 50,
-        }}
-      >
-        {/* Logo */}
-        <div style={{ padding: "24px 20px", borderBottom: `1px solid ${BORDER_COLOR}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              width: "38px", height: "38px", borderRadius: "10px", background: BRAND_RED,
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              <span style={{ color: "white", fontWeight: 800, fontSize: "16px" }}>G</span>
-            </div>
-            <div>
-              <p style={{ margin: 0, color: TEXT_PRIMARY, fontWeight: 800, fontSize: "16px", lineHeight: 1 }}>Ghartika</p>
-              <p style={{ margin: "3px 0 0", color: TEXT_MUTED, fontSize: "11px" }}>Admin Panel</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="admin-mobile-toggle"
-            style={{
-              display: "none", background: "none", border: "none", cursor: "pointer", color: TEXT_MUTED, padding: "4px"
-            }}
-          >
-            <X style={{ width: "20px", height: "20px" }} />
-          </button>
-        </div>
+      {activeTab === "orders" && (
+        <OrdersTab
+          orders={orders}
+          onStatusUpdate={updateOrderStatus}
+          onPatch={patchOrder}
+          onBulkUpdate={handleBulkUpdate}
+          isLoading={ordersLoading}
+        />
+      )}
 
-        {/* Navigation */}
-        <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", gap: "10px",
-                padding: "10px 14px", borderRadius: "10px", border: "none",
-                background: activeTab === item.id ? BG_MAIN : "transparent",
-                color: activeTab === item.id ? BRAND_RED : TEXT_MUTED,
-                textAlign: "left", cursor: "pointer", fontSize: "14px", fontWeight: 600,
-                marginBottom: "2px", transition: "all 0.15s ease",
-                fontFamily: "var(--font-outfit), sans-serif",
-              }}
-              onMouseOver={e => {
-                if (activeTab !== item.id) {
-                  (e.currentTarget as HTMLButtonElement).style.background = BG_MAIN;
-                  (e.currentTarget as HTMLButtonElement).style.color = TEXT_PRIMARY;
-                }
-              }}
-              onMouseOut={e => {
-                if (activeTab !== item.id) {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  (e.currentTarget as HTMLButtonElement).style.color = TEXT_MUTED;
-                }
-              }}
-            >
-              {item.icon}
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.badge && (
-                <span style={{
-                  background: BRAND_RED, color: "white", fontSize: "11px", fontWeight: 700,
-                  borderRadius: "99px", padding: "1px 7px", minWidth: "20px", textAlign: "center",
-                }}>
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
+      {activeTab === "products" && (
+        <ProductsTab
+          products={products}
+          onAdd={addProduct}
+          onUpdate={updateProduct}
+          onDelete={deleteProduct}
+          onDuplicate={handleDuplicate}
+          isLoading={productsLoading}
+        />
+      )}
 
-        {/* Footer links */}
-        <div style={{ padding: "12px 10px", borderTop: `1px solid ${BORDER_COLOR}` }}>
-          <a
-            href="/"
-            style={{
-              display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px",
-              borderRadius: "10px", color: TEXT_MUTED, textDecoration: "none",
-              fontSize: "13px", fontWeight: 500, transition: "all 0.15s", marginBottom: "4px",
-            }}
-          >
-            <Store style={{ width: "16px", height: "16px" }} />
-            View Store
-            <ArrowUpRight style={{ width: "12px", height: "12px", marginLeft: "auto" }} />
-          </a>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: "100%", display: "flex", alignItems: "center", gap: "10px",
-              padding: "10px 14px", borderRadius: "10px", border: "none",
-              background: "transparent", color: BRAND_RED,
-              cursor: "pointer", fontSize: "13px", fontWeight: 500,
-              fontFamily: "var(--font-outfit), sans-serif",
-            }}
-          >
-            <LogOut style={{ width: "16px", height: "16px" }} />
-            Logout
-          </button>
-        </div>
-      </aside>
+      {activeTab === "inventory" && (
+        <InventoryTab products={products} onRefreshProducts={refreshProducts} />
+      )}
 
-      {/* ── Main Content ── */}
-      <div className="admin-main-wrap" style={{ flex: 1, marginLeft: "240px", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        {/* Top Header */}
-        <header style={{
-          background: BG_SURFACE, borderBottom: `1px solid ${BORDER_COLOR}`,
-          padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center",
-          position: "sticky", top: 0, zIndex: 40,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="admin-mobile-toggle"
-              style={{
-                display: "none",
-                background: BG_MAIN,
-                border: `1px solid ${BORDER_COLOR}`,
-                borderRadius: "8px",
-                padding: "8px",
-                cursor: "pointer",
-                color: TEXT_PRIMARY,
-              }}
-              title="Toggle Menu"
-            >
-              <Menu style={{ width: "18px", height: "18px" }} />
-            </button>
-            <div>
-              <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 800, color: TEXT_PRIMARY }}>
-                {tabLabels[activeTab]}
-              </h1>
-              <p style={{ margin: "2px 0 0", color: TEXT_MUTED, fontSize: "12px" }}>
-                Ghartika Spices Admin — {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-              </p>
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <button
-              onClick={handleManualRefresh}
-              disabled={isRefreshing}
-              title="Refresh Orders & Products"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 14px",
-                background: BG_MAIN,
-                border: `1px solid ${BORDER_COLOR}`,
-                borderRadius: "10px",
-                color: TEXT_PRIMARY,
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: isRefreshing ? "not-allowed" : "pointer",
-                fontFamily: "var(--font-outfit), sans-serif",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <RefreshCw
-                style={{
-                  width: "14px",
-                  height: "14px",
-                  animation: isRefreshing ? "adminSpin 0.8s linear infinite" : "none",
-                }}
-              />
-              <span className="hidden-mobile">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
-            </button>
-            <div style={{
-              padding: "6px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0",
-              borderRadius: "99px", fontSize: "12px", fontWeight: 600, color: "#16a34a",
-              display: "flex", alignItems: "center", gap: "6px",
-            }}>
-              <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e" }} /> Live
-            </div>
-            <div style={{
-              width: "34px", height: "34px", borderRadius: "99px",
-              background: BRAND_RED, display: "flex", alignItems: "center", justifyContent: "center",
-              color: "white", fontWeight: 800, fontSize: "13px",
-            }}>
-              A
-            </div>
-          </div>
-        </header>
+      {activeTab === "categories" && <CategoriesTab />}
 
-        {/* Page Content */}
-        <main style={{ flex: 1, padding: "28px 32px", overflowY: "auto" }}>
-          {/* ── DASHBOARD TAB ── */}
-          {activeTab === "dashboard" && (
-            <div style={{ display: "grid", gap: "24px" }}>
-              {/* Stat Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                {[
-                  { label: "Total Revenue",   value: `₹${totalRevenue.toLocaleString("en-IN")}`, icon: <IndianRupee />, color: BRAND_RED, bg: BG_MAIN },
-                  { label: "Total Orders",    value: orders.length.toString(),                     icon: <ShoppingCart />, color: BRAND_GOLD, bg: BG_MAIN },
-                  { label: "Pending Orders",  value: pendingOrders.toString(),                     icon: <AlertCircle />, color: "#b45309", bg: BG_MAIN },
-                  { label: "Customers",       value: totalCustomers.toString(),                    icon: <Users />,        color: "#6d28d9", bg: BG_MAIN },
-                ].map((s, i) => (
-                  <div key={i} style={{
-                    background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px",
-                    padding: "20px 24px", display: "flex", alignItems: "center", gap: "16px",
-                  }}>
-                    <div style={{
-                      width: "44px", height: "44px", borderRadius: "12px",
-                      background: s.bg, color: s.color, border: `1px solid ${BORDER_COLOR}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      {s.icon}
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: "12px", color: TEXT_MUTED, fontWeight: 600, textTransform: "uppercase" }}>{s.label}</p>
-                      <p style={{ margin: "4px 0 0", fontSize: "24px", fontWeight: 800, color: TEXT_PRIMARY }}>{s.value}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {activeTab === "customers" && <CustomersTab orders={orders} />}
 
-              {/* Recent Orders Table */}
-              <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", overflow: "hidden" }}>
-                <div style={{ padding: "20px 24px", borderBottom: `1px solid ${BORDER_COLOR}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: TEXT_PRIMARY }}>Recent Orders</h3>
-                  <button onClick={() => setActiveTab("orders")} style={{
-                    display: "flex", alignItems: "center", gap: "6px", fontSize: "13px",
-                    color: BRAND_RED, fontWeight: 600, background: "none", border: "none",
-                    cursor: "pointer", fontFamily: "var(--font-outfit), sans-serif",
-                  }}>
-                    Sab Dekho <ArrowUpRight style={{ width: "14px", height: "14px" }} />
-                  </button>
-                </div>
-                {orders.length === 0 ? (
-                  <div style={{ padding: "48px", textAlign: "center", color: TEXT_MUTED }}>
-                    <ShoppingBag style={{ width: "48px", height: "48px", margin: "0 auto 12px", opacity: 0.3 }} />
-                    <p style={{ fontWeight: 600, margin: 0 }}>Koi orders nahi abhi</p>
-                  </div>
-                ) : (
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
-                      <thead>
-                        <tr style={{ background: BG_MAIN }}>
-                          {["Order ID", "Customer", "Date", "Total", "Status"].map(h => (
-                            <th key={h} style={{ padding: "12px 20px", textAlign: "left", color: TEXT_MUTED, fontWeight: 600, fontSize: "12px", textTransform: "uppercase" }}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.slice(0, 5).map(order => (
-                          <tr key={order.id} style={{ borderTop: `1px solid ${BORDER_COLOR}` }}>
-                            <td style={{ padding: "14px 20px", fontFamily: "monospace", fontSize: "12px", color: TEXT_MUTED }}>{order.id.slice(0, 16)}…</td>
-                            <td style={{ padding: "14px 20px", fontWeight: 600, color: TEXT_PRIMARY }}>{order.customer.name}</td>
-                            <td style={{ padding: "14px 20px", color: TEXT_MUTED, fontSize: "12px" }}>{formatDate(order.date)}</td>
-                            <td style={{ padding: "14px 20px", fontWeight: 700, color: BRAND_RED }}>₹{order.total}</td>
-                            <td style={{ padding: "14px 20px" }}><StatusBadge status={order.status} /></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+      {activeTab === "coupons" && <CouponsTab />}
 
-          {/* ── ANALYTICS TAB ── */}
-          {activeTab === "analytics" && <AnalyticsTab orders={orders} />}
+      {activeTab === "abandoned" && <AbandonedCartsTab />}
 
-          {/* ── ORDERS TAB ── */}
-          {activeTab === "orders" && (
-            <div style={{ display: "grid", gap: "16px" }}>
-              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <div style={{ position: "relative", flex: 1, minWidth: "220px" }}>
-                  <Search style={{ width: "16px", height: "16px", position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: TEXT_MUTED }} />
-                  <input
-                    type="text"
-                    placeholder="Name, phone, ya order ID..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    style={{
-                      width: "100%", padding: "10px 12px 10px 38px",
-                      border: `1px solid ${BORDER_COLOR}`, borderRadius: "10px",
-                      fontSize: "14px", outline: "none", background: BG_SURFACE,
-                      fontFamily: "var(--font-outfit), sans-serif", color: TEXT_PRIMARY,
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-                <div style={{ position: "relative" }}>
-                  <Filter style={{ width: "14px", height: "14px", position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: TEXT_MUTED }} />
-                  <select
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value as OrderStatus | "All")}
-                    style={{
-                      padding: "10px 12px 10px 32px",
-                      border: `1px solid ${BORDER_COLOR}`, borderRadius: "10px",
-                      fontSize: "14px", outline: "none", background: BG_SURFACE,
-                      cursor: "pointer", fontFamily: "var(--font-outfit), sans-serif", color: TEXT_PRIMARY,
-                    }}
-                  >
-                    <option value="All">Sab Status</option>
-                    {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
+      {activeTab === "reviews" && <ReviewsTab />}
 
-              {filteredOrders.length === 0 ? (
-                <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "48px", textAlign: "center", color: TEXT_MUTED }}>
-                  <ShoppingBag style={{ width: "48px", height: "48px", margin: "0 auto 12px", opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600, margin: 0 }}>Koi orders nahi mili</p>
-                </div>
-              ) : (
-                filteredOrders.map(order => (
-                  <div key={order.id} style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", overflow: "hidden" }}>
-                    <button
-                      style={{
-                        width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", gap: "16px",
-                        background: "none", border: "none", cursor: "pointer", textAlign: "left",
-                        fontFamily: "var(--font-outfit), sans-serif",
-                      }}
-                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                      onMouseOver={e => (e.currentTarget as HTMLButtonElement).style.background = BG_MAIN}
-                      onMouseOut={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-                    >
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 120px", gap: "12px", flex: 1, alignItems: "center" }}>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "11px", color: TEXT_MUTED, textTransform: "uppercase" }}>Order ID</p>
-                          <p style={{ margin: "3px 0 0", fontFamily: "monospace", fontSize: "12px", color: TEXT_PRIMARY }}>{order.id.slice(0, 16)}…</p>
-                        </div>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "11px", color: TEXT_MUTED, textTransform: "uppercase" }}>Customer</p>
-                          <p style={{ margin: "3px 0 0", fontWeight: 700, color: TEXT_PRIMARY, fontSize: "14px" }}>{order.customer.name}</p>
-                        </div>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "11px", color: TEXT_MUTED, textTransform: "uppercase" }}>Total</p>
-                          <p style={{ margin: "3px 0 0", fontWeight: 700, color: BRAND_RED, fontSize: "15px" }}>₹{order.total}</p>
-                        </div>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "11px", color: TEXT_MUTED, textTransform: "uppercase", marginBottom: "3px" }}>Status</p>
-                          <StatusBadge status={order.status} />
-                        </div>
-                      </div>
-                      {expandedOrder === order.id ? <ChevronUp style={{ width: "18px", height: "18px", color: TEXT_MUTED }} /> : <ChevronDown style={{ width: "18px", height: "18px", color: TEXT_MUTED }} />}
-                    </button>
+      {activeTab === "storefront" && <StorefrontTab />}
 
-                    {expandedOrder === order.id && (
-                      <div style={{ borderTop: `1px solid ${BORDER_COLOR}`, padding: "20px", display: "grid", gap: "16px" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                          <div style={{ background: BG_MAIN, border: `1px solid ${BORDER_COLOR}`, borderRadius: "12px", padding: "16px" }}>
-                            <h4 style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 700, color: TEXT_PRIMARY, display: "flex", alignItems: "center", gap: "6px" }}>
-                              <Users style={{ width: "14px", height: "14px", color: BRAND_RED }} /> Customer Details
-                            </h4>
-                            <div style={{ display: "grid", gap: "8px", fontSize: "13px" }}>
-                              <p style={{ margin: 0, fontWeight: 700, color: TEXT_PRIMARY }}>{order.customer.name}</p>
-                              <p style={{ margin: 0, color: TEXT_MUTED, display: "flex", alignItems: "center", gap: "6px" }}><Phone style={{ width: "12px", height: "12px" }} /> {order.customer.phone}</p>
-                              {order.customer.email && <p style={{ margin: 0, color: TEXT_MUTED, display: "flex", alignItems: "center", gap: "6px" }}><Mail style={{ width: "12px", height: "12px" }} /> {order.customer.email}</p>}
-                              <p style={{ margin: 0, color: TEXT_MUTED, display: "flex", alignItems: "flex-start", gap: "6px" }}><MapPin style={{ width: "12px", height: "12px", flexShrink: 0, marginTop: "2px" }} /><span>{order.customer.address}, {order.customer.city}, {order.customer.state} — {order.customer.pincode}</span></p>
-                            </div>
-                          </div>
+      {activeTab === "media" && <MediaLibraryTab />}
 
-                          <div style={{ background: BG_MAIN, border: `1px solid ${BORDER_COLOR}`, borderRadius: "12px", padding: "16px" }}>
-                            <h4 style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 700, color: TEXT_PRIMARY, display: "flex", alignItems: "center", gap: "6px" }}>
-                              <Package style={{ width: "14px", height: "14px", color: BRAND_RED }} /> Items
-                            </h4>
-                            <div style={{ display: "grid", gap: "8px" }}>
-                              {order.items.map(item => (
-                                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                                  <span style={{ color: TEXT_PRIMARY }}>{item.name} <span style={{ color: TEXT_MUTED }}>({item.weight}) × {item.quantity}</span></span>
-                                  <span style={{ fontWeight: 700, color: TEXT_PRIMARY }}>₹{item.price * item.quantity}</span>
-                                </div>
-                              ))}
-                              <div style={{ borderTop: `1px solid ${BORDER_COLOR}`, paddingTop: "8px", display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
-                                <span style={{ color: TEXT_PRIMARY }}>Total</span>
-                                <span style={{ color: BRAND_RED }}>₹{order.total}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+      {activeTab === "seo" && <SEOTab />}
 
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "13px", fontWeight: 600, color: TEXT_PRIMARY }}>Update Status:</span>
-                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                            {ALL_STATUSES.map(status => {
-                              const cfg = STATUS_CONFIG[status];
-                              const isActive = order.status === status;
-                              return (
-                                <button
-                                  key={status}
-                                  onClick={() => handleStatusUpdate(order.id, status)}
-                                  style={{
-                                    padding: "6px 14px", borderRadius: "99px", fontSize: "12px", fontWeight: 600,
-                                    cursor: "pointer", fontFamily: "var(--font-outfit), sans-serif",
-                                    background: isActive ? cfg.bg : BG_SURFACE,
-                                    color: isActive ? cfg.color : TEXT_MUTED,
-                                    border: isActive ? `1px solid ${cfg.border}` : `1px solid ${BORDER_COLOR}`,
-                                  }}
-                                >
-                                  {status}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+      {activeTab === "suppliers" && <SuppliersTab />}
 
-          {/* ── CUSTOMERS TAB ── */}
-          {activeTab === "customers" && (
-            <div style={{ display: "grid", gap: "16px" }}>
-              {customers.length === 0 ? (
-                <div style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "48px", textAlign: "center", color: TEXT_MUTED }}>
-                  <Users style={{ width: "48px", height: "48px", margin: "0 auto 12px", opacity: 0.3 }} />
-                  <p style={{ fontWeight: 600, margin: 0 }}>Koi customers nahi abhi</p>
-                </div>
-              ) : (
-                customers.map((customer, i) => (
-                  <div key={i} style={{ background: BG_SURFACE, border: `1px solid ${BORDER_COLOR}`, borderRadius: "16px", padding: "20px 24px" }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
-                      <div style={{
-                        width: "52px", height: "52px", borderRadius: "50%", background: BRAND_RED,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        color: "white", fontWeight: 800, fontSize: "20px", flexShrink: 0,
-                      }}>
-                        {customer.info.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ margin: 0, fontWeight: 800, fontSize: "16px", color: TEXT_PRIMARY }}>{customer.info.name}</p>
-                        <div style={{ display: "flex", gap: "16px", marginTop: "6px", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "13px", color: TEXT_MUTED, display: "flex", alignItems: "center", gap: "5px" }}><Phone style={{ width: "12px", height: "12px" }} /> {customer.info.phone}</span>
-                          {customer.info.email && <span style={{ fontSize: "13px", color: TEXT_MUTED, display: "flex", alignItems: "center", gap: "5px" }}><Mail style={{ width: "12px", height: "12px" }} /> {customer.info.email}</span>}
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: "24px" }}>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: TEXT_PRIMARY }}>{customer.orders.length}</p>
-                          <p style={{ margin: "2px 0 0", fontSize: "11px", color: TEXT_MUTED, fontWeight: 500, textTransform: "uppercase" }}>Orders</p>
-                        </div>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: BRAND_RED }}>₹{customer.totalSpent}</p>
-                          <p style={{ margin: "2px 0 0", fontSize: "11px", color: TEXT_MUTED, fontWeight: 500, textTransform: "uppercase" }}>Spent</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+      {activeTab === "finance" && <FinanceTab orders={orders} />}
 
-          {/* ── PRODUCTS TAB ── */}
-          {activeTab === "products" && <ProductsTab />}
+      {activeTab === "reports" && <ReportsTab orders={orders} products={products} />}
 
-        </main>
-      </div>
+      {activeTab === "notifications" && (
+        <NotificationsTab
+          onNavigate={(tab) => setActiveTab(tab)}
+          onRefreshBadge={fetchPendingCounts}
+        />
+      )}
 
-      <style>{`
-        @keyframes adminSpin {
-          to { transform: rotate(360deg); }
-        }
-        @media (max-width: 768px) {
-          .admin-sidebar {
-            transform: translateX(-100%);
-            transition: transform 0.25s ease-in-out;
-            box-shadow: 0 0 25px rgba(0,0,0,0.25);
-          }
-          .admin-sidebar.open {
-            transform: translateX(0);
-          }
-          .admin-main-wrap {
-            margin-left: 0 !important;
-          }
-          .admin-mobile-toggle {
-            display: flex !important;
-          }
-          .hidden-mobile {
-            display: none !important;
-          }
-        }
-      `}</style>
-    </div>
+      {activeTab === "staff" && <StaffTab />}
+
+      {activeTab === "settings" && <SettingsTab />}
+
+      {activeTab === "health" && <HealthTab />}
+
+      {activeTab === "costing-dashboard" && (
+        <CostingDashboardTab onNavTo={(tab) => setActiveTab(tab)} />
+      )}
+
+      {activeTab === "product-costing" && <ProductCostingTab />}
+
+      {activeTab === "raw-materials" && <RawMaterialsTab />}
+
+      {activeTab === "recipes-production" && <RecipesProductionTab />}
+
+      {activeTab === "cost-history" && <CostHistoryTab />}
+
+      {activeTab === "profit-reports" && <ProfitReportsTab />}
+
+      {activeTab === "costing-settings" && <CostingSettingsTab />}
+
+      {activeTab === "analytics" && <AnalyticsTab orders={orders} />}
+    </AdminShell>
   );
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
 import { useOrders } from "@/context/OrderContext";
-import { CheckCircle2, ArrowLeft, Package } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Package, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -33,11 +33,87 @@ export default function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; message: string } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const discountAmount = appliedCoupon ? appliedCoupon.discount : 0;
+  const finalTotal = Math.max(0, totalPrice - discountAmount);
+
+  // Sync abandoned cart snapshot when customer enters phone
+  const syncAbandonedCart = (phoneVal: string, nameVal?: string) => {
+    if (phoneVal.replace(/\D/g, "").length >= 10 && cart.length > 0) {
+      fetch("/api/abandoned-carts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name: nameVal || formData.name,
+            phone: phoneVal,
+            email: formData.email,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+          },
+          items: cart,
+          total: finalTotal,
+        }),
+      }).catch(() => {});
+    }
+  };
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponError("");
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponInput.trim().toUpperCase(),
+          cartTotal: totalPrice,
+          customerPhone: formData.phone || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        setAppliedCoupon({
+          code: data.code,
+          discount: data.discountAmount,
+          message: data.message,
+        });
+        setCouponInput("");
+      } else {
+        setCouponError(data.message || "Invalid coupon code");
+      }
+    } catch {
+      setCouponError("Error applying coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError("");
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === "phone") syncAbandonedCart(value, next.name);
+      return next;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +125,7 @@ export default function Checkout() {
         const newOrderId = await placeOrder(
           formData,
           cart,
-          totalPrice,
+          finalTotal,
           "COD",
           "COD"
         );
@@ -62,7 +138,7 @@ export default function Checkout() {
               id: newOrderId,
               customer: formData,
               items: cart,
-              total: totalPrice,
+              total: finalTotal,
               razorpayOrderId: "COD",
               razorpayPaymentId: "COD",
             },
@@ -85,7 +161,7 @@ export default function Checkout() {
       const createRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: totalPrice }),
+        body: JSON.stringify({ amount: finalTotal }),
       });
 
       if (!createRes.ok) throw new Error("Failed to create Razorpay order");
@@ -129,7 +205,7 @@ export default function Checkout() {
             const newOrderId = await placeOrder(
               formData,
               cart,
-              totalPrice,
+              finalTotal,
               response.razorpay_order_id,
               response.razorpay_payment_id
             );
@@ -143,7 +219,7 @@ export default function Checkout() {
                   id: newOrderId,
                   customer: formData,
                   items: cart,
-                  total: totalPrice,
+                  total: finalTotal,
                   razorpayOrderId: response.razorpay_order_id,
                   razorpayPaymentId: response.razorpay_payment_id,
                 },
@@ -504,9 +580,9 @@ export default function Checkout() {
                       Placing Order...
                     </span>
                   ) : paymentMethod === "online" ? (
-                    `Pay ₹${totalPrice} Securely`
+                    `Pay ₹${finalTotal} Securely`
                   ) : (
-                    `Place COD Order (₹${totalPrice})`
+                    `Place COD Order (₹${finalTotal})`
                   )}
                 </button>
               </form>
@@ -541,6 +617,58 @@ export default function Checkout() {
                 ))}
               </ul>
 
+              {/* Coupon Code Section */}
+              <div className="my-5 p-4 rounded-2xl border" style={{ backgroundColor: "var(--surface-muted)", borderColor: "var(--border-light)" }}>
+                <div className="flex items-center gap-2 mb-2 font-bold text-xs uppercase" style={{ color: "var(--text-primary)" }}>
+                  <Tag className="w-3.5 h-3.5 text-[var(--brand-red)]" />
+                  Have a Coupon Code?
+                </div>
+
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                    <div>
+                      <span className="font-black text-xs text-green-700 tracking-wider">
+                        {appliedCoupon.code}
+                      </span>
+                      <p className="text-[11px] text-green-600 font-medium">
+                        {appliedCoupon.message}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="p-1 hover:bg-green-100 rounded-lg text-green-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. GHARTIKA10"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="flex-1 px-3 py-2 bg-white rounded-xl border text-xs font-bold uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[var(--brand-red)]"
+                      style={{ borderColor: "var(--border-light)" }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isApplyingCoupon || !couponInput.trim()}
+                      className="px-4 py-2 bg-[var(--brand-red)] text-white text-xs font-bold rounded-xl transition hover:opacity-90 disabled:opacity-50"
+                    >
+                      {isApplyingCoupon ? "..." : "Apply"}
+                    </button>
+                  </form>
+                )}
+
+                {couponError && (
+                  <p className="mt-2 text-xs font-medium text-red-600">
+                    {couponError}
+                  </p>
+                )}
+              </div>
+
               <hr className="my-4" style={{ borderColor: "var(--border-light)" }} />
 
               <div className="flex justify-between items-center mb-2">
@@ -551,6 +679,18 @@ export default function Checkout() {
                   ₹{totalPrice}
                 </span>
               </div>
+
+              {discountAmount > 0 && (
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-green-600 flex items-center gap-1">
+                    Coupon Discount ({appliedCoupon?.code})
+                  </span>
+                  <span className="font-bold text-green-600">
+                    - ₹{discountAmount}
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm" style={{ color: "var(--text-muted)" }}>
                   Delivery
@@ -567,7 +707,7 @@ export default function Checkout() {
                   Total
                 </span>
                 <span className="text-2xl font-black" style={{ color: "var(--brand-red)" }}>
-                  ₹{totalPrice}
+                  ₹{finalTotal}
                 </span>
               </div>
             </div>
