@@ -633,7 +633,7 @@ export default function Checkout() {
                           <div className="p-3 bg-white border border-gray-200 rounded-2xl shadow-sm mb-3">
                             <img
                               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                                `upi://pay?pa=${storeSettings?.upiId || "ghartikaspices@okaxis"}&pn=${encodeURIComponent(
+                                `upi://pay?pa=${storeSettings?.upiId || "rytvishal@okicici"}&pn=${encodeURIComponent(
                                   storeSettings?.upiName || "Ghartika Spices"
                                 )}&am=${finalTotal}&cu=INR&tn=${encodeURIComponent("Ghartika Order")}`
                               )}`}
@@ -646,13 +646,13 @@ export default function Checkout() {
                             <span className="text-xs text-gray-500">Payable Amount:</span>
                             <p className="text-xl font-extrabold text-[#A01C2C]">₹{finalTotal}</p>
                             <p className="text-[11px] text-gray-400 font-mono mt-0.5">
-                              UPI ID: {storeSettings?.upiId || "ghartikaspices@okaxis"}
+                              UPI ID: {storeSettings?.upiId || "rytvishal@okicici"}
                             </p>
                           </div>
 
                           {/* Mobile Direct Pay Button */}
                           <a
-                            href={`upi://pay?pa=${storeSettings?.upiId || "ghartikaspices@okaxis"}&pn=${encodeURIComponent(
+                            href={`upi://pay?pa=${storeSettings?.upiId || "rytvishal@okicici"}&pn=${encodeURIComponent(
                               storeSettings?.upiName || "Ghartika Spices"
                             )}&am=${finalTotal}&cu=INR&tn=${encodeURIComponent("Ghartika Order")}`}
                             className="w-full py-2.5 px-4 mb-4 rounded-xl text-white text-xs font-bold text-center flex items-center justify-center gap-2 shadow-sm transition hover:opacity-95"

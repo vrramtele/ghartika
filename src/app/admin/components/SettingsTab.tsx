@@ -24,7 +24,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
   enableCod: true,
   enableOnlinePayment: true,
   enableUpiQr: true,
-  upiId: "",
+  upiId: "rytvishal@okicici",
   upiName: "Ghartika Spices",
   razorpayKeyId: "",
   razorpayKeySecret: "",

@@ -16,8 +16,8 @@ export async function GET() {
       enableCod: settings.enableCod ?? true,
       enableOnlinePayment: settings.enableOnlinePayment ?? true,
       enableUpiQr: settings.enableUpiQr ?? true,
-      upiId: settings.upiId || "",
-      upiName: settings.upiName || "GharTika Spices",
+      upiId: settings.upiId || "rytvishal@okicici",
+      upiName: settings.upiName || "Ghartika Spices",
       contactPhone: settings.contactPhone || "",
       contactEmail: settings.contactEmail || "",
       whatsappSupport: settings.whatsappSupport || "",
@@ -34,3 +34,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
   }
 }
+
