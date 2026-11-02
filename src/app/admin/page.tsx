@@ -39,6 +39,7 @@ import {
 
 // ── Login Screen (Neumorphic) ─────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState("");
@@ -52,13 +53,13 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", password }),
+        body: JSON.stringify({ action: "login", email, password }),
       });
       if (res.ok) {
         onLogin();
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Galat password! Dobara try karo.");
+        setError(data.error ?? "Galat email ya password!");
         setShaking(true);
         setTimeout(() => setShaking(false), 600);
         setPassword("");
@@ -105,6 +106,32 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Email Field */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ color: C.textSub, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 10 }}>
+              Admin Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              placeholder="admin@example.com"
+              autoFocus
+              required
+              style={{
+                width: "100%", padding: "15px 18px",
+                background: C.base,
+                boxShadow: error ? `inset 2px 2px 5px ${C.shadowDark}, inset -2px -2px 5px ${C.shadowLight}, 0 0 0 1.5px ${C.red}` : nm.inset,
+                border: "none",
+                borderRadius: 14,
+                color: C.text, fontSize: 15, outline: "none",
+                boxSizing: "border-box", fontFamily: "var(--font-outfit), sans-serif",
+                fontWeight: 600,
+              }}
+            />
+          </div>
+
+          {/* Password Field */}
           <div style={{ marginBottom: 24 }}>
             <label style={{ color: C.textSub, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 10 }}>
               Admin Password
@@ -115,7 +142,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
                 placeholder="••••••••"
-                autoFocus
+                required
                 style={{
                   width: "100%", padding: "15px 48px 15px 18px",
                   background: C.base,

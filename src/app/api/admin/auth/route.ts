@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "rytvishal@gmail.com").trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Vishal20063110";
 const JWT_SECRET = process.env.JWT_SECRET || "ghartika-spices-super-secret-jwt-key-2024";
 const COOKIE_NAME = "ghartika_admin_token";
 
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { action, password } = body;
+    const { action, email, password } = body;
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // ── Logout ──
@@ -71,10 +72,13 @@ export async function POST(req: Request) {
         );
       }
 
-      if (password !== ADMIN_PASSWORD) {
+      const inputEmail = String(email || "").trim().toLowerCase();
+      const inputPassword = String(password || "");
+
+      if (inputEmail !== ADMIN_EMAIL || inputPassword !== ADMIN_PASSWORD) {
         recordFailedAttempt(ip);
         return NextResponse.json(
-          { error: `Galat password! ${remaining - 1} attempts remaining.` },
+          { error: `Galat email ya password! Sirf authorized admin hi access kar sakta hai. (${remaining - 1} attempts left)` },
           { status: 401 }
         );
       }
@@ -83,7 +87,7 @@ export async function POST(req: Request) {
       clearFailedAttempts(ip);
 
       const token = jwt.sign(
-        { role: "admin" },
+        { role: "admin", email: ADMIN_EMAIL },
         JWT_SECRET,
         { expiresIn: "8h" }
       );
