@@ -93,18 +93,6 @@ const team = [
     img: "/founder.jpg",
     quote: "Masala sirf swad nahi, yaadein bhi deta hai.",
   },
-  {
-    name: "Sunita Devi",
-    role: "Quality Head",
-    img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face",
-    quote: "Har packet mein meri amma ki mehnat hoti hai.",
-  },
-  {
-    name: "Arjun Patel",
-    role: "Sourcing & Farmer Relations",
-    img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop&crop=face",
-    quote: "Kisan khush toh masala shuddh — yahi hamara mantra hai.",
-  },
 ];
 
 /* ─── Page ─── */
