@@ -479,7 +479,7 @@ export default function AboutPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div className="flex justify-center">
             {team.map((member, i) => (
               <motion.div
                 key={member.name}
@@ -488,32 +488,33 @@ export default function AboutPage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeUp}
-                className="flex flex-col items-center text-center group"
+                className="flex flex-col items-center text-center group max-w-sm"
               >
                 <div className="relative mb-5">
                   <div
-                    className="w-32 h-32 rounded-full overflow-hidden shadow-xl group-hover:scale-105 transition-transform"
-                    style={{ border: "4px solid var(--brand-gold)" }}
+                    className="w-44 h-44 rounded-full overflow-hidden shadow-2xl group-hover:scale-105 transition-transform"
+                    style={{ border: "5px solid var(--brand-gold)" }}
                   >
                     <img
                       src={member.img}
                       alt={member.name}
                       className="w-full h-full object-cover"
+                      style={{ objectPosition: "center 10%" }}
                     />
                   </div>
                   {/* Online dot */}
                   <div
-                    className="absolute bottom-1 right-1 w-4 h-4 rounded-full"
+                    className="absolute bottom-2 right-2 w-5 h-5 rounded-full"
                     style={{
                       backgroundColor: "var(--brand-green)",
-                      border: "2px solid var(--brand-brown)",
+                      border: "3px solid var(--brand-brown)",
                     }}
                   />
                 </div>
-                <h3 className="font-black text-lg">{member.name}</h3>
-                <p className="text-sm font-medium mb-3" style={{ color: "var(--brand-gold)" }}>{member.role}</p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 max-w-xs">
-                  <Quote className="w-4 h-4 mb-1 mx-auto" style={{ color: "var(--brand-gold)" }} />
+                <h3 className="font-black text-xl">{member.name}</h3>
+                <p className="text-sm font-medium mb-4" style={{ color: "var(--brand-gold)" }}>{member.role}</p>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10 max-w-xs">
+                  <Quote className="w-4 h-4 mb-2 mx-auto" style={{ color: "var(--brand-gold)" }} />
                   <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.8)" }}>{member.quote}</p>
                 </div>
               </motion.div>
