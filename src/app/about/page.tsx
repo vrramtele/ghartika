@@ -88,9 +88,9 @@ const stats = [
 
 const team = [
   {
-    name: "Ramesh Sharma",
-    role: "Founder & Master Blender",
-    img: "https://images.unsplash.com/photo-1537511446984-935f663eb1f4?w=300&h=300&fit=crop&crop=face",
+    name: "Vishal Ramteke",
+    role: "Founder & CEO",
+    img: "/founder.jpg",
     quote: "Masala sirf swad nahi, yaadein bhi deta hai.",
   },
   {
